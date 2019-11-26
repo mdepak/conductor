@@ -28,7 +28,7 @@ public class JedisClusterMod implements JedisCommands
 
     private final JedisCluster jedis;
 
-    public JedisClusterMod(JedisCluster jedisCluster)
+    JedisClusterMod(JedisCluster jedisCluster)
     {
         this.jedis = jedisCluster;
     }
