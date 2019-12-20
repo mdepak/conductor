@@ -144,7 +144,6 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
 
     @Inject
     public ElasticSearchRestDAOV5(RestClient lowLevelRestClient, ElasticSearchConfiguration config, ObjectMapper objectMapper) {
-
         this.objectMapper = objectMapper;
         this.elasticSearchAdminClient = lowLevelRestClient;
         this.elasticSearchClient = new RestHighLevelClient(lowLevelRestClient);
@@ -155,42 +154,34 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
         this.indexBatchSize = config.getIndexBatchSize();
         this.asyncBufferFlushTimeout = config.getAsyncBufferFlushTimeout();
         this.config = config;
-
         // Set up a workerpool for performing async operations for workflow and task
         int corePoolSize = 6;
         int maximumPoolSize = config.getAsyncMaxPoolSize();
         long keepAliveTime = 1L;
         int workerQueueSize = config.getAsyncWorkerQueueSize();
         this.executorService = new ThreadPoolExecutor(corePoolSize,
-                maximumPoolSize,
-                keepAliveTime,
-                TimeUnit.MINUTES,
-                new LinkedBlockingQueue<>(workerQueueSize),
-                (runnable, executor) -> {
-                    logger.warn("Request  {} to async dao discarded in executor {}", runnable, executor);
-                    Monitors.recordDiscardedIndexingCount("indexQueue");
-                });
+                                                      maximumPoolSize,
+                                                      keepAliveTime,
+                                                      TimeUnit.MINUTES,
+                                                      new LinkedBlockingQueue<>(workerQueueSize),
+                                                      (runnable, executor) -> {
+            logger.warn("Request {} to async dao discarded in executor {}", runnable, executor);
+            Monitors.recordDiscardedIndexingCount("indexQueue");
+        });
 
         // Set up a workerpool for performing async operations for task_logs, event_executions, message
         corePoolSize = 1;
         maximumPoolSize = 2;
         keepAliveTime = 30L;
         this.logExecutorService = new ThreadPoolExecutor(corePoolSize,
-            maximumPoolSize,
-            keepAliveTime,
-            TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(workerQueueSize),
-            (runnable, executor) -> {
-                logger.warn("Request {} to async log dao discarded in executor {}", runnable, executor);
-                Monitors.recordDiscardedIndexingCount("logQueue");
-            });
-
-        try {
-            setup();
-        }
-        catch (Exception e) {
-            logger.error("Error in setting up elasticsearch ", e);
-        }
+                                                         maximumPoolSize,
+                                                         keepAliveTime,
+                                                         TimeUnit.SECONDS,
+                                                         new LinkedBlockingQueue<>(workerQueueSize),
+                                                         (runnable, executor) -> {
+            logger.warn("Request {} to async log dao discarded in executor {}", runnable, executor);
+            Monitors.recordDiscardedIndexingCount("logQueue");
+        });
 
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(this::flushBulkRequests, 60, 30, TimeUnit.SECONDS);
     }

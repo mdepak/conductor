@@ -37,19 +37,17 @@ public class Main {
     private static final int EMBEDDED_ES_INIT_TIME = 5000;
 
     public static void main(String[] args) throws Exception {
-
         loadConfigFile(args.length > 0 ? args[0] : System.getenv("CONDUCTOR_CONFIG_FILE"));
-
         if (args.length == 2) {
             System.out.println("Using log4j config " + args[1]);
             PropertyConfigurator.configure(new FileInputStream(new File(args[1])));
         }
-
         Injector bootstrapInjector = Guice.createInjector(new BootstrapModule());
         ModulesProvider modulesProvider = bootstrapInjector.getInstance(ModulesProvider.class);
         Injector serverInjector = Guice.createInjector(modulesProvider.get());
+        Optional<EmbeddedElasticSearch> embeddedSearchInstance = serverInjector.getInstance(EmbeddedElasticSearchProvider.class)
+                                                                               .get();
 
-        Optional<EmbeddedElasticSearch> embeddedSearchInstance = serverInjector.getInstance(EmbeddedElasticSearchProvider.class).get();
         if (embeddedSearchInstance.isPresent()) {
             try {
                 embeddedSearchInstance.get().start();
@@ -58,12 +56,19 @@ public class Main {
                  * A possible solution for reading and writing into the index is to wait a specific amount of time.
                  */
                 Thread.sleep(EMBEDDED_ES_INIT_TIME);
-            } catch (Exception ioe) {
+            }
+            catch (Exception ioe) {
                 ioe.printStackTrace(System.err);
                 System.exit(3);
             }
         }
-
+        try {
+            serverInjector.getInstance(IndexDAO.class).setup();
+        }
+        catch (Exception e) {
+            e.printStackTrace(System.err);
+            System.exit(3);
+        }
         System.out.println("\n\n\n");
         System.out.println("                     _            _             ");
         System.out.println("  ___ ___  _ __   __| |_   _  ___| |_ ___  _ __ ");
@@ -71,11 +76,11 @@ public class Main {
         System.out.println("| (_| (_) | | | | (_| | |_| | (__| || (_) | |   ");
         System.out.println(" \\___\\___/|_| |_|\\__,_|\\__,_|\\___|\\__\\___/|_|   ");
         System.out.println("\n\n\n");
-
         serverInjector.getInstance(GRPCServerProvider.class).get().ifPresent(server -> {
             try {
                 server.start();
-            } catch (IOException ioe) {
+            }
+            catch (IOException ioe) {
                 ioe.printStackTrace(System.err);
                 System.exit(3);
             }
@@ -84,12 +89,12 @@ public class Main {
         serverInjector.getInstance(JettyServerProvider.class).get().ifPresent(server -> {
             try {
                 server.start();
-            } catch (Exception ioe) {
+            }
+            catch (Exception ioe) {
                 ioe.printStackTrace(System.err);
                 System.exit(3);
             }
         });
-
     }
 
     private static void loadConfigFile(String propertyFile) throws IOException {

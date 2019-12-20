@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2016 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
@@ -10,13 +10,14 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-/**
- *
- */
 package com.netflix.conductor.elasticsearch.es5;
 
 import com.google.inject.AbstractModule;
-
+import com.google.inject.TypeLiteral;
+import com.google.inject.matcher.AbstractMatcher;
+import com.google.inject.spi.InjectionListener;
+import com.google.inject.spi.TypeEncounter;
+import com.google.inject.spi.TypeListener;
 import com.netflix.conductor.dao.IndexDAO;
 import com.netflix.conductor.dao.es5.index.ElasticSearchDAOV5;
 import com.netflix.conductor.dao.es5.index.ElasticSearchRestDAOV5;
@@ -48,13 +49,31 @@ public class ElasticSearchV5Module extends AbstractModule {
 
     @Override
     protected void configure() {
-
+        AbstractMatcher<TypeLiteral<?>> matcher = new AbstractMatcher<TypeLiteral<?>>() {
+            public boolean matches(TypeLiteral<?> typeLiteral) {
+                return IndexDAO.class.isAssignableFrom(typeLiteral.getRawType());
+            }
+        };
+        TypeListener typeListener = new TypeListener() {
+            @Override
+            public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
+                encounter.register((InjectionListener<I>) i -> {
+                    IndexDAO indexDAO = (IndexDAO) i;
+                    try {
+                        indexDAO.setup();
+                    }
+                    catch (Exception e) {
+                        throw new RuntimeException("Error setting up indexes", e);
+                    }
+                });
+            }
+        };
+        bindListener(matcher, typeListener);
         if (restTransport) {
             bind(IndexDAO.class).to(ElasticSearchRestDAOV5.class);
         } else {
             bind(IndexDAO.class).to(ElasticSearchDAOV5.class);
         }
-
         bind(EmbeddedElasticSearchProvider.class).to(EmbeddedElasticSearchV5Provider.class);
     }
 }
