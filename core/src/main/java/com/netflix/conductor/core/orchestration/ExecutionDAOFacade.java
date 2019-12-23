@@ -405,7 +405,7 @@ public class ExecutionDAOFacade {
     }
 
     public void addTaskExecLog(List<TaskExecLog> logs) {
-        if (config.isTaskLogIndexingEnabled()) {
+        if (config.isTaskExecLogIndexingEnabled()) {
             if (config.enableAsyncIndexing()) {
                 indexDAO.asyncAddTaskExecutionLogs(logs);
             }
@@ -433,7 +433,7 @@ public class ExecutionDAOFacade {
     }
 
     public List<TaskExecLog> getTaskExecutionLogs(String taskId) {
-        return config.isTaskLogIndexingEnabled() ? indexDAO.getTaskExecutionLogs(taskId) : Collections.emptyList();
+        return config.isTaskExecLogIndexingEnabled() ? indexDAO.getTaskExecutionLogs(taskId) : Collections.emptyList();
     }
 
     class DelayWorkflowUpdate implements Runnable {

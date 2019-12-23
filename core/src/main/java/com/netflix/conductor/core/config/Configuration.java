@@ -76,8 +76,8 @@ public interface Configuration {
     String EVENT_MESSAGE_INDEXING_ENABLED_PROPERTY_NAME = "worklfow.event.message.indexing.enabled";
     boolean EVENT_MESSAGE_INDEXING_ENABLED_DEFAULT_VALUE = true;
 
-    String TASKLOG_INDEXING_ENABLED_PROPERTY_NAME = "workflow.tasklog.indexing.enabled";
-    boolean TASKLOG_INDEXING_ENABLED_DEFAULT_VALUE = true;
+    String TASKEXECLOG_INDEXING_ENABLED_PROPERTY_NAME = "workflow.taskExecLog.indexing.enabled";
+    boolean TASKEXECLOG_INDEXING_ENABLED_DEFAULT_VALUE = true;
 
     //TODO add constants for input/output external payload related properties.
 
@@ -109,10 +109,10 @@ public interface Configuration {
     }
 
     /**
-     * @return if true(default), enables task log indexing
+     * @return if true(default), enables task execution log indexing
      */
-    default boolean isTaskLogIndexingEnabled() {
-        return getBooleanProperty(TASKLOG_INDEXING_ENABLED_PROPERTY_NAME, TASKLOG_INDEXING_ENABLED_DEFAULT_VALUE);
+    default boolean isTaskExecLogIndexingEnabled() {
+        return getBooleanProperty(TASKEXECLOG_INDEXING_ENABLED_PROPERTY_NAME, TASKEXECLOG_INDEXING_ENABLED_DEFAULT_VALUE);
     }
 
     /**
