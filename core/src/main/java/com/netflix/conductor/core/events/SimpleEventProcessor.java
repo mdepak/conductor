@@ -36,19 +36,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -71,6 +60,7 @@ public class SimpleEventProcessor implements EventProcessor {
     private final ObjectMapper objectMapper;
     private final JsonUtils jsonUtils;
     private final boolean isEventMessageIndexingEnabled;
+    private final boolean isEventExecutionPersistenceEnabled;
 
     @Inject
     public SimpleEventProcessor(ExecutionService executionService,
@@ -87,7 +77,10 @@ public class SimpleEventProcessor implements EventProcessor {
         this.objectMapper = objectMapper;
         this.jsonUtils = jsonUtils;
 
-        this.isEventMessageIndexingEnabled = configuration.isEventMessageIndexingEnabled();
+        isEventMessageIndexingEnabled = configuration.isEventMessageIndexingEnabled();
+
+        isEventExecutionPersistenceEnabled = configuration.isEventMessageIndexingEnabled();
+
         int executorThreadCount = configuration.getIntProperty("workflow.event.processor.thread.count", 2);
         if (executorThreadCount > 0) {
             executorService = Executors.newFixedThreadPool(executorThreadCount);
@@ -188,7 +181,7 @@ public class SimpleEventProcessor implements EventProcessor {
             if (StringUtils.isNotEmpty(condition)) {
                 logger.debug("Checking condition: {} for event: {}", condition, event);
                 Boolean success = ScriptEvaluator.evalBool(condition, jsonUtils.expand(payloadObject));
-                if (!success) {
+                if (!success && isEventExecutionPersistenceEnabled) {
                     String id = msg.getId() + "_" + 0;
                     EventExecution eventExecution = new EventExecution(id, msg.getId());
                     eventExecution.setCreated(System.currentTimeMillis());
@@ -232,10 +225,15 @@ public class SimpleEventProcessor implements EventProcessor {
             eventExecution.setName(eventHandler.getName());
             eventExecution.setAction(action.getAction());
             eventExecution.setStatus(Status.IN_PROGRESS);
-            if (executionService.addEventExecution(eventExecution)) {
-                futuresList.add(CompletableFuture.supplyAsync(() -> execute(eventExecution, action, getPayloadObject(msg.getPayload())), executorService));
+
+            if (isEventExecutionPersistenceEnabled) {
+                if (executionService.addEventExecution(eventExecution)) {
+                    futuresList.add(CompletableFuture.supplyAsync(() -> execute(eventExecution, action, getPayloadObject(msg.getPayload())), executorService));
+                } else {
+                    logger.warn("Duplicate delivery/execution of message: {}", msg.getId());
+                }
             } else {
-                logger.warn("Duplicate delivery/execution of message: {}", msg.getId());
+                futuresList.add(CompletableFuture.supplyAsync(() -> execute(eventExecution, action, getPayloadObject(msg.getPayload())), executorService));
             }
         }
         return CompletableFutures.allAsList(futuresList);
