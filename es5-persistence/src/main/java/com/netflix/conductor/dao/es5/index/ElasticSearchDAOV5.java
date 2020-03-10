@@ -80,6 +80,7 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.Strings;
+import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -240,7 +241,7 @@ public class ElasticSearchDAOV5 implements IndexDAO {
 
     }
 
-    private void addIndex(String indexName) {
+    private void addIndex(String indexName) throws IOException {
         try {
             elasticSearchClient.admin()
                     .indices()
@@ -252,10 +253,9 @@ public class ElasticSearchDAOV5 implements IndexDAO {
             try {
 
                 CreateIndexRequest createIndexRequest = new CreateIndexRequest(indexName);
-                createIndexRequest.settings(Settings.builder()
-                        .put("index.number_of_shards", config.getElasticSearchIndexShardCount())
-                        .put("index.number_of_replicas", config.getElasticSearchIndexReplicationCount())
-                );
+
+                createIndexRequest.settings(Settings.readSettingsFromStream((StreamInput) ElasticSearchDAOV5.class
+                        .getResourceAsStream(config.getElasticSearchIndexSettingsFile())));
 
                 elasticSearchClient.admin()
                         .indices()

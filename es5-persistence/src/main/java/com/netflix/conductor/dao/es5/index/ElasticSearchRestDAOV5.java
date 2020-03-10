@@ -305,18 +305,14 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
         if (doesResourceNotExist(resourcePath)) {
 
             try {
-                ObjectNode setting = objectMapper.createObjectNode();
-                ObjectNode indexSetting = objectMapper.createObjectNode();
+                InputStream stream = ElasticSearchDAOV5.class.getResourceAsStream(config.getElasticSearchIndexSettingsFile());
+                byte[] templateSource = IOUtils.toByteArray(stream);
 
-                indexSetting.put("number_of_shards", config.getElasticSearchIndexShardCount());
-                indexSetting.put("number_of_replicas", config.getElasticSearchIndexReplicationCount());
+                HttpEntity entity = new NByteArrayEntity(templateSource, ContentType.APPLICATION_JSON);
 
-                setting.set("index", indexSetting);
+                elasticSearchAdminClient.performRequest(HttpMethod.PUT, resourcePath, Collections.emptyMap(), entity);
 
-                elasticSearchAdminClient.performRequest(HttpMethod.PUT, resourcePath, Collections.emptyMap(),
-                        new NStringEntity(setting.toString(), ContentType.APPLICATION_JSON));
-
-                logger.info("Added '{}' index", index);
+                logger.info("Added '{}' index with settings file {}", index, config.getElasticSearchIndexSettingsFile());
             } catch (ResponseException e) {
 
                 boolean errorCreatingIndex = true;
