@@ -18,6 +18,7 @@ package com.netflix.conductor.dao.es5.index;
 import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 
@@ -30,7 +31,7 @@ import java.util.Objects;
 public class BulkRequestBuilderWrapper {
 	private final BulkRequestBuilder bulkRequestBuilder;
 
-	public BulkRequestBuilderWrapper(@Nonnull BulkRequestBuilder bulkRequestBuilder) {
+	BulkRequestBuilderWrapper(@Nonnull BulkRequestBuilder bulkRequestBuilder) {
 		this.bulkRequestBuilder = Objects.requireNonNull(bulkRequestBuilder);
 	}
 
@@ -46,7 +47,13 @@ public class BulkRequestBuilderWrapper {
 		}
 	}
 
-	public int numberOfActions() {
+	public void add(@Nonnull DeleteRequest req) {
+		synchronized (bulkRequestBuilder) {
+			bulkRequestBuilder.add(Objects.requireNonNull(req));
+		}
+	}
+
+	int numberOfActions() {
 		synchronized (bulkRequestBuilder) {
 			return bulkRequestBuilder.numberOfActions();
 		}

@@ -261,6 +261,9 @@ public class ExecutionDAOFacade {
             } else {
                 // Not archiving, also remove workflow from index
                 indexDAO.asyncRemoveWorkflow(workflowId);
+
+                // remove all the task index
+                workflow.getTasks().forEach(task -> removeTaskIndex(task.getTaskId()));
             }
 
             // remove workflow from DAO
@@ -364,6 +367,15 @@ public class ExecutionDAOFacade {
 
     public void removeTask(String taskId) {
         executionDAO.removeTask(taskId);
+    }
+
+    private void removeTaskIndex(String taskId)
+    {
+        if (config.enableAsyncIndexing()) {
+            indexDAO.asyncRemoveTask(taskId);
+        } else {
+            indexDAO.removeTask(taskId);
+        }
     }
 
     public List<PollData> getTaskPollData(String taskName) {

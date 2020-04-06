@@ -612,8 +612,25 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
     }
 
     @Override
+    public void removeTask(String taskId) {
+        DeleteRequest request = new DeleteRequest(indexName, TASK_DOC_TYPE, taskId);
+
+        bulkRequests.putIfAbsent(TASK_DOC_TYPE, new BulkRequests(System.currentTimeMillis(), new BulkRequest()));
+        bulkRequests.get(TASK_DOC_TYPE).getBulkRequest().add(request);
+
+        if (bulkRequests.get(TASK_DOC_TYPE).getBulkRequest().numberOfActions() >= this.indexBatchSize) {
+            indexBulkRequest(TASK_DOC_TYPE);
+        }
+    }
+
+    @Override
     public CompletableFuture<Void> asyncRemoveWorkflow(String workflowId) {
         return CompletableFuture.runAsync(() -> removeWorkflow(workflowId), executorService);
+    }
+
+    @Override
+    public CompletableFuture<Void> asyncRemoveTask(String taskId) {
+        return CompletableFuture.runAsync(() -> removeTask(taskId), executorService);
     }
 
     @Override

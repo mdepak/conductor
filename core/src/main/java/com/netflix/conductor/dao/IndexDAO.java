@@ -92,11 +92,24 @@ public interface IndexDAO {
     void removeWorkflow(String workflowId);
 
     /**
+     * Remove the task index
+     * @param taskId task to be removed
+     */
+    void removeTask(String taskId);
+
+    /**
      * Remove the workflow index
      * @param workflowId workflow to be removed
      * @return CompletableFuture of type void
      */
     CompletableFuture<Void> asyncRemoveWorkflow(String workflowId);
+
+    /**
+     * Remove the task index
+     * @param taskId task to be removed
+     * @return CompletableFuture of type void
+     */
+    CompletableFuture<Void> asyncRemoveTask(String taskId);
 
     /**
      *
