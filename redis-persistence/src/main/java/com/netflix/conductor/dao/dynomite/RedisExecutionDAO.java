@@ -319,8 +319,6 @@ public class RedisExecutionDAO extends BaseDynoDAO implements ExecutionDAO {
 			dynoClient.srem(nsKey(CORR_ID_TO_WORKFLOWS, workflow.getCorrelationId()), workflowId);
 			dynoClient.srem(nsKey(PENDING_WORKFLOWS, workflow.getWorkflowName()), workflowId);
 
-			// Remove the object
-			dynoClient.del(nsKey(WORKFLOW, workflowId));
 			for (Task task : workflow.getTasks()) {
 				removeTask(task.getTaskId());
 			}
@@ -328,6 +326,9 @@ public class RedisExecutionDAO extends BaseDynoDAO implements ExecutionDAO {
 			// After deleting tasks, remove the empty mapping sets
 			dynoClient.del(nsKey(WORKFLOW_TO_TASKS, workflow.getWorkflowId()));
 			dynoClient.del(nsKey(SCHEDULED_TASKS, workflow.getWorkflowId()));
+
+			// Remove the object
+			dynoClient.del(nsKey(WORKFLOW, workflowId));
 
 			return true;
 		}
