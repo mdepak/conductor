@@ -324,6 +324,11 @@ public class RedisExecutionDAO extends BaseDynoDAO implements ExecutionDAO {
 			for (Task task : workflow.getTasks()) {
 				removeTask(task.getTaskId());
 			}
+
+			// After deleting tasks, remove the empty mapping sets
+			dynoClient.del(nsKey(WORKFLOW_TO_TASKS, workflow.getWorkflowId()));
+			dynoClient.del(nsKey(SCHEDULED_TASKS, workflow.getWorkflowId()));
+
 			return true;
 		}
 		return false;
