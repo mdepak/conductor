@@ -16,6 +16,7 @@
 package com.netflix.conductor.contribs.listener;
 
 import com.netflix.conductor.common.run.Workflow;
+import com.netflix.conductor.core.config.Configuration;
 import com.netflix.conductor.core.execution.WorkflowStatusListener;
 import com.netflix.conductor.core.orchestration.ExecutionDAOFacade;
 import org.slf4j.Logger;
@@ -33,21 +34,23 @@ public class ArchivingWorkflowStatusListener implements WorkflowStatusListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchivingWorkflowStatusListener.class);
 
     private final ExecutionDAOFacade executionDAOFacade;
+    private final boolean archiveWorkflow;
 
     @Inject
-    public ArchivingWorkflowStatusListener(ExecutionDAOFacade executionDAOFacade) {
+    public ArchivingWorkflowStatusListener(ExecutionDAOFacade executionDAOFacade, Configuration configuration) {
         this.executionDAOFacade = executionDAOFacade;
+        archiveWorkflow = configuration.workflowDeletionDisabled();
     }
 
     @Override
     public void onWorkflowCompleted(Workflow workflow) {
         LOGGER.info("Archiving workflow {} on completion ", workflow.getWorkflowId());
-        this.executionDAOFacade.removeWorkflow(workflow.getWorkflowId(), true);
+        this.executionDAOFacade.removeWorkflow(workflow.getWorkflowId(), archiveWorkflow);
     }
 
     @Override
     public void onWorkflowTerminated(Workflow workflow) {
         LOGGER.info("Archiving workflow {} on termination", workflow.getWorkflowId());
-        this.executionDAOFacade.removeWorkflow(workflow.getWorkflowId(), true);
+        this.executionDAOFacade.removeWorkflow(workflow.getWorkflowId(), archiveWorkflow);
     }
 }
