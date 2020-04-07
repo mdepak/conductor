@@ -94,8 +94,8 @@ public interface Configuration {
     String OWNER_EMAIL_MANDATORY_NAME = "workflow.owner.email.mandatory";
     boolean OWNER_EMAIL_MANDATORY_DEFAULT_VALUE = true;
 
-    String ARCHIVE_MODULE_WORKFLOW_DELETION_DISABLED_PROPERTY_NAME = "workflow.archive.deletion.disabled";
-    boolean ARCHIVE_MODULE_WORKFLOW_DELETION_DISABLED_DEFAULT_VALUE = true;
+    String ARCHIVE_ON_DELETION_ENABLED_PROPERTY_NAME = "workflow.archive.on.deletion.enabled";
+    boolean ARCHIVE_ON_DELETION_ENABLED_DEFAULT_VALUE = true;
 
     //TODO add constants for input/output external payload related properties.
 
@@ -253,7 +253,7 @@ public interface Configuration {
      * @return true if the workflow are to be archived in the ArchivingWorkflowModule; else workflow are deleted
      */
     default boolean workflowDeletionDisabled() {
-        return getBooleanProperty(ARCHIVE_MODULE_WORKFLOW_DELETION_DISABLED_PROPERTY_NAME, ARCHIVE_MODULE_WORKFLOW_DELETION_DISABLED_DEFAULT_VALUE);
+        return getBooleanProperty(ARCHIVE_ON_DELETION_ENABLED_PROPERTY_NAME, ARCHIVE_ON_DELETION_ENABLED_DEFAULT_VALUE);
     }
 
     /**
