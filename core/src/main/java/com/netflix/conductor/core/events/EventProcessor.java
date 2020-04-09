@@ -33,7 +33,9 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.management.monitor.Monitor;
 
+import com.netflix.conductor.metrics.Monitors;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -211,7 +213,8 @@ public class EventProcessor {
 				}
 				ee.setStatus(Status.COMPLETED);
 				es.updateEventExecution(ee);
-				
+
+				Monitors.recordEventProcessed();
 				return null;
 			}catch(Exception e) {
 				logger.error(e.getMessage(), e);

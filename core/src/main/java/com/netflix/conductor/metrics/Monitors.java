@@ -211,4 +211,8 @@ public class Monitors {
 	public static void recordTaskRateLimited(String taskDefName, int limit) {
 		gauge(classQualifier, "task_rate_limited", limit, "taskType", taskDefName);
 	}
+
+	public static void recordEventProcessed() {
+		counter(classQualifier, "event_processed_count");
+	}
 }
