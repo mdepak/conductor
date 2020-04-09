@@ -146,7 +146,9 @@ public class EventProcessor {
 			
 			String event = queue.getType() + ":" + queue.getName();
 			List<EventHandler> handlers = ms.getEventHandlersForEvent(event, true);
-			
+
+			Monitors.recordEventProcessed();
+
 			for(EventHandler handler : handlers) {
 				
 				String condition = handler.getCondition();
@@ -186,6 +188,7 @@ public class EventProcessor {
 					}
 				}
 			}
+
 			
 			for (Future<Void> future : futures) {
 				try {
@@ -214,7 +217,6 @@ public class EventProcessor {
 				ee.setStatus(Status.COMPLETED);
 				es.updateEventExecution(ee);
 
-				Monitors.recordEventProcessed();
 				return null;
 			}catch(Exception e) {
 				logger.error(e.getMessage(), e);
