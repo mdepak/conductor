@@ -288,4 +288,8 @@ public class Monitors {
 	public static void recordAcquireLockFailure(String exceptionClassName) {
 		counter(classQualifier, "acquire_lock_failure", "exceptionType", exceptionClassName);
 	}
+
+	public static void recordEventProcessed() {
+		counter(classQualifier, "total_event_processed");
+	}
 }
