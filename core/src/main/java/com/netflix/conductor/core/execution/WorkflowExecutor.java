@@ -342,7 +342,7 @@ public class WorkflowExecutor {
 
     public static final Predicate<Task> isSystemTask = task -> SystemTaskType.is(task.getTaskType());
 
-    private static final Predicate<Task> isNonTerminalTask = task -> !task.getStatus().isTerminal();
+    private final Predicate<Task> isNonTerminalTask = task -> !task.getStatus().isTerminal();
 
     /**
      * @throws ApplicationException if validation fails
