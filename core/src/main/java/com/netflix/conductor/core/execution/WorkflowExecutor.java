@@ -66,6 +66,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -392,6 +393,7 @@ public class WorkflowExecutor {
         }
 
         try {
+            Monitors.recordWorkflowStarted();
             executionDAOFacade.createWorkflow(workflow);
             LOGGER.debug("A new instance of workflow: {} created with id: {}", workflow.getWorkflowName(), workflowId);
             //then decide to see if anything needs to be done as part of the workflow
@@ -1333,6 +1335,9 @@ public class WorkflowExecutor {
             List<Task> tasksToBeQueued = createdTasks.stream()
                     .filter(isSystemTask.negate())
                     .collect(Collectors.toList());
+
+            Monitors.recordTaskStarted(tasksToBeQueued.size());
+            Monitors.recordSystemTaskStarted(systemTasks.size());
 
             boolean startedSystemTasks = false;
 
