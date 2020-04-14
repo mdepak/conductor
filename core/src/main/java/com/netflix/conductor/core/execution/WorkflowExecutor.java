@@ -341,9 +341,9 @@ public class WorkflowExecutor {
 
     private final Predicate<PollData> validateLastPolledTime = pd -> pd.getLastPollTime() > System.currentTimeMillis() - (activeWorkerLastPollInSecs * 1000);
 
-    private final Predicate<Task> isSystemTask = task -> SystemTaskType.is(task.getTaskType());
+    public static final Predicate<Task> isSystemTask = task -> SystemTaskType.is(task.getTaskType());
 
-    private final Predicate<Task> isNonTerminalTask = task -> !task.getStatus().isTerminal();
+    private static final Predicate<Task> isNonTerminalTask = task -> !task.getStatus().isTerminal();
 
     /**
      * @throws ApplicationException if validation fails
@@ -393,7 +393,6 @@ public class WorkflowExecutor {
         }
 
         try {
-            Monitors.recordWorkflowStarted();
             executionDAOFacade.createWorkflow(workflow);
             LOGGER.debug("A new instance of workflow: {} created with id: {}", workflow.getWorkflowName(), workflowId);
             //then decide to see if anything needs to be done as part of the workflow
@@ -659,6 +658,7 @@ public class WorkflowExecutor {
             decide(parent.getWorkflowId());
         }
         Monitors.recordWorkflowCompletion(workflow.getWorkflowName(), workflow.getEndTime() - workflow.getStartTime(), workflow.getOwnerApp());
+        Monitors.recordWorkflowCompleted();
         queueDAO.remove(DECIDER_QUEUE, workflow.getWorkflowId());    //remove from the sweep queue
 
         if (workflow.getWorkflowDefinition().isWorkflowStatusListenerEnabled()) {
@@ -1335,9 +1335,6 @@ public class WorkflowExecutor {
             List<Task> tasksToBeQueued = createdTasks.stream()
                     .filter(isSystemTask.negate())
                     .collect(Collectors.toList());
-
-            Monitors.recordTaskStarted(tasksToBeQueued.size());
-            Monitors.recordSystemTaskStarted(systemTasks.size());
 
             boolean startedSystemTasks = false;
 

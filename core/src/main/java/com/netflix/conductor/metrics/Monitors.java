@@ -297,15 +297,15 @@ public class Monitors {
 		counter(classQualifier, "total_events_processed");
 	}
 
-	public static void recordWorkflowStarted() {
-		counter(classQualifier, "total_workflows_started");
+	public static void recordWorkflowCompleted() {
+		counter(classQualifier, "total_workflows_completed");
 	}
 
-	public static void recordTaskStarted(int numTasks) {
-		getCounter(classQualifier, "total_tasks_started").increment(numTasks);
+	public static void recordTaskCompleted() {
+		counter(classQualifier, "total_tasks_completed");
 	}
 
-	public static void recordSystemTaskStarted(int numTasks) {
-		getCounter(classQualifier, "total_system_tasks_started").increment(numTasks);
+	public static void recordSystemTaskCompleted() {
+		counter(classQualifier, "total_system_tasks_completed");
 	}
 }
