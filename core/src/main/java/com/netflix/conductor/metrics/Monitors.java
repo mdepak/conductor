@@ -213,6 +213,18 @@ public class Monitors {
 	}
 
 	public static void recordEventProcessed() {
-		counter(classQualifier, "event_processed_count");
+		counter(classQualifier, "total_events_processed");
+	}
+
+	public static void recordWorkflowCompleted() {
+		counter(classQualifier, "total_workflows_completed");
+	}
+
+	public static void recordTaskCompleted() {
+		counter(classQualifier, "total_tasks_completed");
+	}
+
+	public static void recordSystemTaskCompleted() {
+		counter(classQualifier, "total_system_tasks_completed");
 	}
 }

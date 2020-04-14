@@ -44,6 +44,7 @@ import com.netflix.conductor.core.config.Configuration;
 import com.netflix.conductor.core.events.queue.Message;
 import com.netflix.conductor.core.execution.ApplicationException;
 import com.netflix.conductor.core.execution.ApplicationException.Code;
+import com.netflix.conductor.core.execution.SystemTaskType;
 import com.netflix.conductor.dao.ExecutionDAO;
 import com.netflix.conductor.dao.IndexDAO;
 import com.netflix.conductor.dao.MetadataDAO;
@@ -166,6 +167,11 @@ public class RedisExecutionDAO extends BaseDynoDAO implements ExecutionDAO {
 		task.setUpdateTime(System.currentTimeMillis());
 		if (task.getStatus() != null && task.getStatus().isTerminal()) {
 			task.setEndTime(System.currentTimeMillis());
+			if (SystemTaskType.is(task.getTaskType())) {
+				Monitors.recordSystemTaskCompleted();
+			} else {
+				Monitors.recordTaskCompleted();
+			}
 		}
 		
 		TaskDef taskDef = metadata.getTaskDef(task.getTaskDefName());

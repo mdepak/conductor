@@ -322,6 +322,7 @@ public class WorkflowExecutor {
 			decide(parent.getWorkflowId());
 		}
 		Monitors.recordWorkflowCompletion(workflow.getWorkflowType(), workflow.getEndTime() - workflow.getStartTime(), wf.getOwnerApp());
+		Monitors.recordWorkflowCompleted();
 		queue.remove(deciderQueue, workflow.getWorkflowId());	//remove from the sweep queue
 	}
 
