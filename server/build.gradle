@@ -10,7 +10,9 @@ plugins {
 
 configurations.all {
     resolutionStrategy {
-		force 'com.fasterxml.jackson.core:jackson-core:2.7.5'
+		force 'com.fasterxml.jackson.core:jackson-core:2.10.0'
+        force 'com.google.guava:guava:20.0'
+        force 'org.eclipse.jetty:jetty-servlet:9.4.22.v20191022'
     }
 }
 
@@ -18,8 +20,9 @@ apply plugin: 'war'
 apply plugin: "org.akhikhl.gretty"
 
 dependencies {
- 
-	//Conductor
+    compile 'com.google.guava:guava:20.0'
+
+    //Conductor
 	compile project(':conductor-core')
 	compile project(':conductor-jersey')
 	compile project(':conductor-redis-persistence')
