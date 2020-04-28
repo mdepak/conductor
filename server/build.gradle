@@ -8,11 +8,15 @@ plugins {
 	id 'com.github.johnrengelman.shadow' version '1.2.3'
 }
 
-configurations.all {
-    resolutionStrategy {
-		force 'com.fasterxml.jackson.core:jackson-core:2.10.0'
-        force 'com.google.guava:guava:20.0'
-        force 'org.eclipse.jetty:jetty-servlet:9.4.22.v20191022'
+configurations {
+    compile.exclude group: 'javax.ws.rs', module: 'jsr311-api'
+
+    all {
+        resolutionStrategy {
+            force 'com.fasterxml.jackson.core:jackson-core:2.10.0'
+            force 'com.google.guava:guava:20.0'
+            force 'org.eclipse.jetty:jetty-servlet:9.4.22.v20191022'
+        }
     }
 }
 
