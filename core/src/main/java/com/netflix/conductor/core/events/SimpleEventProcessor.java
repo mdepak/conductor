@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.management.monitor.Monitor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -152,10 +153,12 @@ public class SimpleEventProcessor implements EventProcessor {
             if (isEventMessageIndexingEnabled) {
                 executionService.addMessage(queue.getName(), msg);
             }
+
             String event = queue.getType() + ":" + queue.getName();
             logger.debug("Evaluating message: {} for event: {}", msg.getId(), event);
             List<EventExecution> transientFailures = executeEvent(event, msg);
 
+            Monitors.recordEventProcessed();
             if (transientFailures.isEmpty()) {
                 queue.ack(Collections.singletonList(msg));
                 logger.debug("Message: {} acked on queue: {}", msg.getId(), queue.getName());
