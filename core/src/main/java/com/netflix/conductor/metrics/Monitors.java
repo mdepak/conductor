@@ -308,4 +308,12 @@ public class Monitors {
 	public static void recordSystemTaskCompleted() {
 		counter(classQualifier, "total_system_tasks_completed");
 	}
+
+	public static void recordSystemTaskWorkerPollingLimited(String queueName) {
+		counter(classQualifier, "system_task_worker_polling_limited", "queueName", queueName);
+	}
+
+	public static void recordWorkflowArchived(String workflowType, WorkflowStatus status) {
+		counter(classQualifier, "workflow_archived", "workflowName", workflowType, "taskStatus", status.name());
+	}
 }
