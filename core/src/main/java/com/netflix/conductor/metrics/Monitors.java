@@ -293,20 +293,16 @@ public class Monitors {
 		counter(classQualifier, "acquire_lock_failure", "exceptionType", exceptionClassName);
 	}
 
-	public static void recordEventProcessed() {
-		counter(classQualifier, "total_events_processed");
+	public static void recordWorkflowCompleted(String workflowType) {
+		counter(classQualifier, "total_workflows_completed", "workflowName", workflowType);
 	}
 
-	public static void recordWorkflowCompleted() {
-		counter(classQualifier, "total_workflows_completed");
+	public static void recordTaskCompleted(String taskType) {
+		counter(classQualifier, "total_tasks_completed","taskType", taskType);
 	}
 
-	public static void recordTaskCompleted() {
-		counter(classQualifier, "total_tasks_completed");
-	}
-
-	public static void recordSystemTaskCompleted() {
-		counter(classQualifier, "total_system_tasks_completed");
+	public static void recordSystemTaskCompleted(String taskType) {
+		counter(classQualifier, "total_system_tasks_completed", "taskType", taskType);
 	}
 
 	public static void recordSystemTaskWorkerPollingLimited(String queueName) {

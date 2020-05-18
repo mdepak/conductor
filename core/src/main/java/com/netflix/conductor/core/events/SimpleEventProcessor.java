@@ -158,7 +158,6 @@ public class SimpleEventProcessor implements EventProcessor {
             logger.debug("Evaluating message: {} for event: {}", msg.getId(), event);
             List<EventExecution> transientFailures = executeEvent(event, msg);
 
-            Monitors.recordEventProcessed();
             if (transientFailures.isEmpty()) {
                 queue.ack(Collections.singletonList(msg));
                 logger.debug("Message: {} acked on queue: {}", msg.getId(), queue.getName());

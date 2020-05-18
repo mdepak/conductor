@@ -340,10 +340,13 @@ public class ExecutionDAOFacade {
                 }
                 if (task.getStatus().isTerminal() && task.getEndTime() == 0) {
                     task.setEndTime(System.currentTimeMillis());
+                }
+
+                if (task.getStatus().isTerminal() && task.getStatus().isSuccessful()) {
                     if (isSystemTask.test(task)) {
-                        Monitors.recordSystemTaskCompleted();
+                        Monitors.recordSystemTaskCompleted(task.getTaskType());
                     } else {
-                        Monitors.recordTaskCompleted();
+                        Monitors.recordTaskCompleted(task.getTaskType());
                     }
                 }
             }
