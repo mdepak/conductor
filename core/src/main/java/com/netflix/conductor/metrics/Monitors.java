@@ -288,4 +288,8 @@ public class Monitors {
 	public static void recordAcquireLockFailure(String exceptionClassName) {
 		counter(classQualifier, "acquire_lock_failure", "exceptionType", exceptionClassName);
 	}
+
+	public static void recordQueuePollSize(String queueType, int val) {
+		getGauge(Monitors.classQualifier, "event_queue_poll", "queueType", queueType).set(val);
+	}
 }

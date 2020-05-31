@@ -79,6 +79,8 @@ public interface Configuration {
     String TASKEXECLOG_INDEXING_ENABLED_PROPERTY_NAME = "workflow.taskExecLog.indexing.enabled";
     boolean TASKEXECLOG_INDEXING_ENABLED_DEFAULT_VALUE = true;
 
+    String EVENT_QUEUE_POLL_SCHEDULER_THREAD_COUNT_PROPERTY_NAME = "worklfow.event.queue.scheduler.poll.thread.count";
+
     //TODO add constants for input/output external payload related properties.
 
     default DB getDB() {
@@ -191,6 +193,15 @@ public interface Configuration {
 
     default boolean getJerseyEnabled() {
         return getBooleanProperty(JERSEY_ENABLED_PROPERTY_NAME, JERSEY_ENABLED_DEFAULT_VALUE);
+    }
+
+    /**
+     * @return the number of threads to be use in Scheduler used for polling events from multiple event queues.
+     * By default, a thread count equal to the number of CPU cores is chosen.
+     */
+    default int getEventSchedulerPollThreadCount()
+    {
+        return getIntProperty(EVENT_QUEUE_POLL_SCHEDULER_THREAD_COUNT_PROPERTY_NAME, Runtime.getRuntime().availableProcessors());
     }
 
     /**
