@@ -215,22 +215,21 @@ public class ExecutionDAOFacade {
             workflow.setEndTime(System.currentTimeMillis());
         }
         executionDAO.updateWorkflow(workflow);
-        if (workflow.getStatus().isTerminal()) {
-            if (config.enableAsyncIndexing()) {
-                if (workflow.getEndTime() - workflow.getStartTime() < config.getAsyncUpdateShortRunningWorkflowDuration() * 1000) {
-                    final String workflowId = workflow.getWorkflowId();
-                    DelayWorkflowUpdate delayWorkflowUpdate = new DelayWorkflowUpdate(workflowId);
-                    LOGGER.debug("Delayed updating workflow: {} in the index by {} seconds", workflowId, config.getAsyncUpdateDelay());
-                    scheduledThreadPoolExecutor.schedule(delayWorkflowUpdate, config.getAsyncUpdateDelay(), TimeUnit.SECONDS);
-                    Monitors.recordWorkerQueueSize("delayQueue", scheduledThreadPoolExecutor.getQueue().size());
-                } else {
-                    indexDAO.asyncIndexWorkflow(workflow);
-                }
-                workflow.getTasks().forEach(indexDAO::asyncIndexTask);
+        if (config.enableAsyncIndexing()) {
+            if (workflow.getStatus().isTerminal() && workflow.getEndTime() - workflow.getStartTime() < config.getAsyncUpdateShortRunningWorkflowDuration() * 1000) {
+                final String workflowId = workflow.getWorkflowId();
+                DelayWorkflowUpdate delayWorkflowUpdate = new DelayWorkflowUpdate(workflowId);
+                LOGGER.debug("Delayed updating workflow: {} in the index by {} seconds", workflowId, config.getAsyncUpdateDelay());
+                scheduledThreadPoolExecutor.schedule(delayWorkflowUpdate, config.getAsyncUpdateDelay(), TimeUnit.SECONDS);
+                Monitors.recordWorkerQueueSize("delayQueue", scheduledThreadPoolExecutor.getQueue().size());
             } else {
-                indexDAO.indexWorkflow(workflow);
-                workflow.getTasks().forEach(indexDAO::indexTask);
+                indexDAO.asyncIndexWorkflow(workflow);
             }
+			if (workflow.getStatus().isTerminal()) {
+				workflow.getTasks().forEach(indexDAO::asyncIndexTask);
+			}
+        } else {
+            indexDAO.indexWorkflow(workflow);
         }
         return workflow.getWorkflowId();
     }
@@ -343,6 +342,15 @@ public class ExecutionDAOFacade {
                 }
             }
             executionDAO.updateTask(task);
+            /*
+             * Indexing a task for every update adds a lot of volume. That is ok but if async indexing
+             * is enabled and tasks are stored in memory until a block has completed, we would lose a lot
+             * of tasks on a system failure. So only index for each update if async indexing is not enabled.
+             * If it *is* enabled, tasks will be indexed only when a workflow is in terminal state.
+             */
+            if (!config.enableAsyncIndexing()) {
+            	indexDAO.indexTask(task);
+            }
         } catch (Exception e) {
             String errorMsg = String.format("Error updating task: %s in workflow: %s", task.getTaskId(), task.getWorkflowInstanceId());
             LOGGER.error(errorMsg, e);
@@ -363,11 +371,22 @@ public class ExecutionDAOFacade {
     }
 
     public PollData getTaskPollDataByDomain(String taskName, String domain) {
-        return pollDataDAO.getPollData(taskName, domain);
+        try {
+            return pollDataDAO.getPollData(taskName, domain);
+        } catch (Exception e) {
+            LOGGER.error("Error fetching pollData for task: '{}', domain: '{}'", taskName, domain, e);
+            return null;
+        }
     }
 
     public void updateTaskLastPoll(String taskName, String domain, String workerId) {
-        pollDataDAO.updateLastPollData(taskName, domain, workerId);
+        try {
+            pollDataDAO.updateLastPollData(taskName, domain, workerId);
+        } catch (Exception e) {
+            LOGGER.error("Error updating PollData for task: {} in domain: {} from worker: {}", taskName, domain,
+                workerId, e);
+            Monitors.error(this.getClass().getCanonicalName(), "updateTaskLastPoll");
+        }
     }
 
     /**
@@ -379,22 +398,26 @@ public class ExecutionDAOFacade {
      */
     public boolean addEventExecution(EventExecution eventExecution) {
         boolean added = executionDAO.addEventExecution(eventExecution);
+
         if (added) {
-            if (config.enableAsyncIndexing()) {
-                indexDAO.asyncAddEventExecution(eventExecution);
-            } else {
-                indexDAO.addEventExecution(eventExecution);
-            }
+            indexEventExecution(eventExecution);
         }
+
         return added;
     }
 
     public void updateEventExecution(EventExecution eventExecution) {
         executionDAO.updateEventExecution(eventExecution);
-        if (config.enableAsyncIndexing()) {
-            indexDAO.asyncAddEventExecution(eventExecution);
-        } else {
-            indexDAO.addEventExecution(eventExecution);
+        indexEventExecution(eventExecution);
+    }
+
+    private void indexEventExecution(EventExecution eventExecution) {
+        if (config.isEventExecutionIndexingEnabled()) {
+            if (config.enableAsyncIndexing()) {
+                indexDAO.asyncAddEventExecution(eventExecution);
+            } else {
+                indexDAO.addEventExecution(eventExecution);
+            }
         }
     }
 

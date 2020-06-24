@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Netflix, Inc.
+ * Copyright 2020 Netflix, Inc.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -24,7 +24,6 @@ import static com.netflix.conductor.common.metadata.workflow.TaskType.TERMINATE;
 import static com.netflix.conductor.core.execution.ApplicationException.Code.CONFLICT;
 import static com.netflix.conductor.core.execution.ApplicationException.Code.INVALID_INPUT;
 import static com.netflix.conductor.core.execution.ApplicationException.Code.NOT_FOUND;
-import static com.netflix.conductor.core.execution.tasks.SubWorkflow.SUB_WORKFLOW_ID;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -89,6 +88,7 @@ public class WorkflowExecutor {
     private WorkflowStatusListener workflowStatusListener;
 
     private int activeWorkerLastPollInSecs;
+    private int queueTaskMessagePostponeSeconds;
     public static final String DECIDER_QUEUE = "_deciderQueue";
     private static final String className = WorkflowExecutor.class.getSimpleName();
     private final ExecutionLockService executionLockService;
@@ -111,6 +111,7 @@ public class WorkflowExecutor {
         this.metadataMapperService = metadataMapperService;
         this.executionDAOFacade = executionDAOFacade;
         this.activeWorkerLastPollInSecs = config.getIntProperty("tasks.active.worker.lastpoll", 10);
+        this.queueTaskMessagePostponeSeconds = config.getIntProperty("task.queue.message.postponeSeconds", 60);
         this.workflowStatusListener = workflowStatusListener;
         this.executionLockService = executionLockService;
     }
@@ -424,24 +425,26 @@ public class WorkflowExecutor {
 
 
     /**
-     * @param workflowId the id of the workflow for which callbacks are to be reset
+     * @param workflowId the id of the workflow for which task callbacks are to be reset
      * @throws ApplicationException if the workflow is in terminal state
      */
-    public void resetCallbacksForInProgressTasks(String workflowId) {
+    public void resetCallbacksForWorkflow(String workflowId) {
         Workflow workflow = executionDAOFacade.getWorkflowById(workflowId, true);
         if (workflow.getStatus().isTerminal()) {
             throw new ApplicationException(CONFLICT, "Workflow is in terminal state. Status =" + workflow.getStatus());
         }
 
-        // Get tasks that have callbackAfterSeconds > 0 and set the callbackAfterSeconds to 0
-        for (Task task : workflow.getTasks()) {
-            if (task.getCallbackAfterSeconds() > 0) {
+        // Get SIMPLE tasks in SCHEDULED state that have callbackAfterSeconds > 0 and set the callbackAfterSeconds to 0
+        workflow.getTasks().stream()
+            .filter(task -> !isSystemTask.test(task)
+                && SCHEDULED.equals(task.getStatus())
+                && task.getCallbackAfterSeconds() > 0)
+            .forEach(task -> {
                 if (queueDAO.resetOffsetTime(QueueUtils.getQueueName(task), task.getTaskId())) {
                     task.setCallbackAfterSeconds(0);
                     executionDAOFacade.updateTask(task);
                 }
-            }
-        }
+            });
     }
 
     public String rerun(RerunWorkflowRequest request) {
@@ -501,6 +504,11 @@ public class WorkflowExecutor {
         workflow.setExternalOutputPayloadStoragePath(null);
         executionDAOFacade.createWorkflow(workflow);
         decide(workflowId);
+
+        if (StringUtils.isNotEmpty(workflow.getParentWorkflowId())) {
+            updateParentWorkflow(workflow);
+            decide(workflow.getParentWorkflowId());
+        }
     }
 
     /**
@@ -531,7 +539,8 @@ public class WorkflowExecutor {
                     retriableMap.put(task.getReferenceTaskName(), task);
                     break;
                 case CANCELED:
-                    if (task.getTaskType().equalsIgnoreCase(TaskType.JOIN.toString())) {
+                    if (task.getTaskType().equalsIgnoreCase(TaskType.JOIN.toString()) ||
+                        task.getTaskType().equalsIgnoreCase(TaskType.DO_WHILE.toString())) {
                         task.setStatus(IN_PROGRESS);
                         // Task doesn't have to be updated yet. Will be updated along with other Workflow tasks downstream.
                     } else {
@@ -568,6 +577,11 @@ public class WorkflowExecutor {
         scheduleTask(workflow, retriableTasks);
 
         decide(workflowId);
+
+        if (StringUtils.isNotEmpty(workflow.getParentWorkflowId())) {
+            updateParentWorkflow(workflow);
+            decide(workflow.getParentWorkflowId());
+        }
     }
 
     /**
@@ -585,6 +599,8 @@ public class WorkflowExecutor {
         taskToBeRetried.setRetried(false);
         taskToBeRetried.setPollCount(0);
         taskToBeRetried.setCallbackAfterSeconds(0);
+        taskToBeRetried.setSubWorkflowId(null);
+        taskToBeRetried.setReasonForIncompletion(null);
         task.setRetried(true);
         task.setExecuted(true); // since this task is being retried and a retry has been computed, task lifecycle is complete
         return taskToBeRetried;
@@ -635,23 +651,8 @@ public class WorkflowExecutor {
         LOGGER.debug("Completed workflow execution for {}", workflow.getWorkflowId());
 
         // If the following task, for some reason fails, the sweep will take care of this again!
-        if (workflow.getParentWorkflowId() != null) {
-            Workflow parent = executionDAOFacade.getWorkflowById(workflow.getParentWorkflowId(), false);
-            WorkflowDef parentDef = Optional.ofNullable(parent.getWorkflowDefinition())
-                    .orElseGet(() -> metadataDAO.getWorkflowDef(parent.getWorkflowName(), parent.getWorkflowVersion())
-                            .orElseThrow(() -> new ApplicationException(NOT_FOUND, String.format("Unable to find parent workflow definition for %s", wf.getWorkflowId())))
-                    );
-            LOGGER.debug("Completed sub-workflow {}, deciding parent workflow {}", workflow.getWorkflowId(), workflow.getParentWorkflowId());
-
-            Task parentWorkflowTask = executionDAOFacade.getTaskById(workflow.getParentWorkflowTaskId());
-            // If parent is FAILED and the sub workflow task in parent is FAILED, we want to resume them
-            if (StringUtils.isBlank(parentDef.getFailureWorkflow()) && parent.getStatus() == WorkflowStatus.FAILED && parentWorkflowTask.getStatus() == FAILED) {
-                parentWorkflowTask.setStatus(IN_PROGRESS);
-                executionDAOFacade.updateTask(parentWorkflowTask);
-                parent.setStatus(WorkflowStatus.RUNNING);
-                executionDAOFacade.updateWorkflow(parent);
-            }
-            decide(parent.getWorkflowId());
+        if (StringUtils.isNotEmpty(workflow.getParentWorkflowId())) {
+            decide(workflow.getParentWorkflowId());
         }
         Monitors.recordWorkflowCompletion(workflow.getWorkflowName(), workflow.getEndTime() - workflow.getStartTime(), workflow.getOwnerApp());
         queueDAO.remove(DECIDER_QUEUE, workflow.getWorkflowId());    //remove from the sweep queue
@@ -682,6 +683,29 @@ public class WorkflowExecutor {
         try {
             executionLockService.acquireLock(workflow.getWorkflowId(), 60000);
 
+            List<Task> tasks = workflow.getTasks();
+            // Remove from the task queue if they were there
+            tasks.forEach(task -> queueDAO.remove(QueueUtils.getQueueName(task), task.getTaskId()));
+
+            // Update non-terminal tasks' status to CANCELED
+            for (Task task : tasks) {
+                if (!task.getStatus().isTerminal()) {
+                    // Cancel the ones which are not completed yet....
+                    task.setStatus(CANCELED);
+                    if (isSystemTask.test(task)) {
+                        WorkflowSystemTask workflowSystemTask = WorkflowSystemTask.get(task.getTaskType());
+                        try {
+                            workflowSystemTask.cancel(workflow, task, this);
+                        } catch (Exception e) {
+                            throw new ApplicationException(Code.INTERNAL_ERROR,
+                                String.format("Error canceling system task: %s/%s", workflowSystemTask.getName(),
+                                    task.getTaskId()), e);
+                        }
+                    }
+                    executionDAOFacade.updateTask(task);
+                }
+            }
+
             if (!workflow.getStatus().isTerminal()) {
                 workflow.setStatus(WorkflowStatus.TERMINATED);
             }
@@ -697,34 +721,10 @@ public class WorkflowExecutor {
             workflow.setReasonForIncompletion(reason);
             executionDAOFacade.updateWorkflow(workflow);
 
-            List<Task> tasks = workflow.getTasks();
-            for (Task task : tasks) {
-                if (!task.getStatus().isTerminal()) {
-                    // Cancel the ones which are not completed yet....
-                    task.setStatus(CANCELED);
-                    if (isSystemTask.test(task)) {
-                        WorkflowSystemTask stt = WorkflowSystemTask.get(task.getTaskType());
-                        try {
-                            stt.cancel(workflow, task, this);
-                        } catch (Exception e) {
-                            throw new ApplicationException(
-                                    Code.INTERNAL_ERROR,
-                                    String.format("Error canceling systems task: %s", stt.getName()),
-                                    e
-                            );
-                        }
-                    }
-                    executionDAOFacade.updateTask(task);
-                }
-                // And remove from the task queue if they were there
-                queueDAO.remove(QueueUtils.getQueueName(task), task.getTaskId());
-            }
-
             // If the following lines, for some reason fails, the sweep will take
             // care of this again!
             if (workflow.getParentWorkflowId() != null) {
-                Workflow parent = executionDAOFacade.getWorkflowById(workflow.getParentWorkflowId(), false);
-                decide(parent.getWorkflowId());
+                decide(workflow.getParentWorkflowId());
             }
 
             if (!StringUtils.isBlank(failureWorkflow)) {
@@ -824,8 +824,9 @@ public class WorkflowExecutor {
         task.setWorkerId(taskResult.getWorkerId());
         task.setCallbackAfterSeconds(taskResult.getCallbackAfterSeconds());
         task.setOutputData(taskResult.getOutputData());
+        task.setSubWorkflowId(taskResult.getSubWorkflowId());
 
-        if (task.getOutputData() != null) {
+        if (task.getOutputData() != null && !task.getOutputData().isEmpty()) {
             deciderService.externalizeTaskData(task);
         } else {
             task.setExternalOutputPayloadStoragePath(taskResult.getExternalOutputPayloadStoragePath());
@@ -978,13 +979,26 @@ public class WorkflowExecutor {
                         if (!workflowSystemTask.isAsync() && workflowSystemTask.execute(workflowInstance, task, this)) {
                             // FIXME: temporary hack to workaround TERMINATE task
                             if (TERMINATE.name().equals(task.getTaskType())) {
-                                workflow.setStatus(workflowInstance.getStatus());
-                                workflow.setOutput(workflowInstance.getOutput());
-                                deciderService.externalizeWorkflowData(workflow);
+                                deciderService.externalizeTaskData(task);
+                                executionDAOFacade.updateTask(task);
+                                if (workflowInstance.getStatus().equals(WorkflowStatus.COMPLETED)) {
+                                    completeWorkflow(workflow);
+                                } else {
+                                    workflow.setStatus(workflowInstance.getStatus());
+                                    terminateWorkflow(workflow, "Workflow is FAILED by TERMINATE task: " + task.getTaskId(), null);
+                                }
+                                return true;
                             }
                             deciderService.externalizeTaskData(task);
                             tasksToBeUpdated.add(task);
                             stateChanged = true;
+                        } else if (SUB_WORKFLOW.name().equals(task.getTaskType()) && task.getStatus().equals(IN_PROGRESS)) {
+                            // Verifies and updates the task inplace, based on the Subworkflow and parent Workflow state,
+                            // and continues with the current decide.
+                            if (updateParentWorkflow(task, workflow)) {
+                                tasksToBeUpdated.add(task);
+                                stateChanged = true;
+                            }
                         }
                     } catch (Exception e) {
                         throw new ApplicationException(Code.INTERNAL_ERROR, String.format("Unable to start system task: %s", workflowSystemTask.getName()), e);
@@ -1142,7 +1156,7 @@ public class WorkflowExecutor {
     }
 
     //Executes the async system task
-    public void executeSystemTask(WorkflowSystemTask systemTask, String taskId, int unackTimeout) {
+    public void executeSystemTask(WorkflowSystemTask systemTask, String taskId, int callbackTime) {
         try {
             Task task = executionDAOFacade.getTaskById(taskId);
             if (task == null) {
@@ -1150,10 +1164,11 @@ public class WorkflowExecutor {
                 return;
             }
             LOGGER.debug("Task: {} fetched from execution DAO for taskId: {}", task, taskId);
+            String queueName = QueueUtils.getQueueName(task);
             if (task.getStatus().isTerminal()) {
                 //Tune the SystemTaskWorkerCoordinator's queues - if the queue size is very big this can happen!
                 LOGGER.info("Task {}/{} was already completed.", task.getTaskType(), task.getTaskId());
-                queueDAO.remove(QueueUtils.getQueueName(task), task.getTaskId());
+                queueDAO.remove(queueName, task.getTaskId());
                 return;
             }
 
@@ -1171,7 +1186,7 @@ public class WorkflowExecutor {
                     task.setStatus(CANCELED);
                 }
                 executionDAOFacade.updateTask(task);
-                queueDAO.remove(QueueUtils.getQueueName(task), task.getTaskId());
+                queueDAO.remove(queueName, task.getTaskId());
                 return;
             }
 
@@ -1179,10 +1194,14 @@ public class WorkflowExecutor {
                 if (executionDAOFacade.exceedsInProgressLimit(task)) {
                     //to do add a metric to record this
                     LOGGER.warn("Concurrent Execution limited for {}:{}", taskId, task.getTaskDefName());
+                    // Postpone a message, so that it would be available for poll again.
+                    queueDAO.postpone(queueName, taskId, task.getWorkflowPriority(), queueTaskMessagePostponeSeconds);
                     return;
                 }
                 if (task.getRateLimitPerFrequency() > 0 && executionDAOFacade.exceedsRateLimitPerFrequency(task, metadataDAO.getTaskDef(task.getTaskDefName()))) {
                     LOGGER.warn("RateLimit Execution limited for {}:{}, limit:{}", taskId, task.getTaskDefName(), task.getRateLimitPerFrequency());
+                    // Postpone a message, so that it would be available for poll again.
+                    queueDAO.postpone(queueName, taskId, task.getWorkflowPriority(), queueTaskMessagePostponeSeconds);
                     return;
                 }
             }
@@ -1214,7 +1233,7 @@ public class WorkflowExecutor {
             }
 
             if (!task.getStatus().isTerminal()) {
-                task.setCallbackAfterSeconds(unackTimeout);
+                task.setCallbackAfterSeconds(callbackTime);
             }
 
             updateTask(new TaskResult(task));
@@ -1222,17 +1241,18 @@ public class WorkflowExecutor {
                 task.getOutputData().toString());
 
         } catch (Exception e) {
+            Monitors.error(className, "executeSystemTask");
             LOGGER.error("Error executing system task - {}, with id: {}", systemTask, taskId, e);
         }
     }
 
     @VisibleForTesting
-    void setTaskDomains(List<Task> tasks, Workflow wf) {
-        Map<String, String> taskToDomain = wf.getTaskToDomain();
+    void setTaskDomains(List<Task> tasks, Workflow workflow) {
+        Map<String, String> taskToDomain = workflow.getTaskToDomain();
         if (taskToDomain != null) {
             // Step 1: Apply * mapping to all tasks, if present.
             String domainstr = taskToDomain.get("*");
-            if (domainstr != null) {
+            if (StringUtils.isNotBlank(domainstr)) {
                 String[] domains = domainstr.split(",");
                 tasks.forEach(task -> {
                     // Filter out SystemTask
@@ -1242,7 +1262,6 @@ public class WorkflowExecutor {
                         task.setDomain(getActiveDomain(task.getTaskType(), domains));
                     }
                 });
-
             }
             // Step 2: Override additional mappings.
             tasks.forEach(task -> {
@@ -1383,7 +1402,7 @@ public class WorkflowExecutor {
             createdTasks.forEach(task -> new RetryUtil<>().retryOnException(() ->
             {
                 if (task.getTaskType().equals(SUB_WORKFLOW.name())) {
-                    executionDAOFacade.removeWorkflow((String) task.getOutputData().get(SUB_WORKFLOW_ID), false);
+                    executionDAOFacade.removeWorkflow(task.getSubWorkflowId(), false);
                 }
                 executionDAOFacade.removeTask(task.getTaskId());
                 return null;
@@ -1454,7 +1473,7 @@ public class WorkflowExecutor {
             } else {
                 // If not found look into sub workflows
                 if (task.getTaskType().equalsIgnoreCase(SubWorkflow.NAME)) {
-                    String subWorkflowId = task.getInputData().get(SUB_WORKFLOW_ID).toString();
+                    String subWorkflowId = task.getSubWorkflowId();
                     if (rerunWF(subWorkflowId, taskId, taskInput, null, null)) {
                         rerunFromTask = task;
                         break;
@@ -1528,5 +1547,86 @@ public class WorkflowExecutor {
                             String reason = String.format("Invalid task specified. Cannot find task by name %s in the task definitions", task.getWorkflowTask().getName());
                             return new TerminateWorkflowException(reason);
                         }));
+    }
+
+    private boolean updateParentWorkflow(Workflow subWorkflow) {
+        Task subWorkflowTask = executionDAOFacade.getTaskById(subWorkflow.getParentWorkflowTaskId());
+        Workflow parentWorkflow = executionDAOFacade.getWorkflowById(subWorkflow.getParentWorkflowId(), false);
+        return updateParentWorkflow(subWorkflowTask, subWorkflow, parentWorkflow);
+    }
+
+    private boolean updateParentWorkflow(Task subWorkflowTask, Workflow parentWorkflow) {
+        Workflow subWorkflow = executionDAOFacade.getWorkflowById(subWorkflowTask.getSubWorkflowId(), false);
+        return updateParentWorkflow(subWorkflowTask, subWorkflow, parentWorkflow);
+    }
+
+    /**
+     * Update parent Workflow based on Subworkflow state.
+     * Updates the provided subWorkflowTask and/or parentWorkflow inplace, where applicable.
+     * @param subWorkflowTask
+     * @param subWorkflow
+     * @param parentWorkflow
+     * @return
+     */
+    @VisibleForTesting
+    protected boolean updateParentWorkflow(Task subWorkflowTask, Workflow subWorkflow, Workflow parentWorkflow) {
+        WorkflowDef parentDef = Optional.ofNullable(parentWorkflow.getWorkflowDefinition())
+                .orElseGet(() -> metadataDAO.getWorkflowDef(parentWorkflow.getWorkflowName(), parentWorkflow.getWorkflowVersion())
+                        .orElseThrow(() -> new ApplicationException(NOT_FOUND, String.format("Unable to find parent workflow definition for %s", parentWorkflow.getWorkflowId())))
+                );
+        LOGGER.debug("Evaluating parent workflow: {} for sub-workflow: {}", subWorkflow.getParentWorkflowId(), subWorkflow.getWorkflowId());
+
+        // On Subworkflow complete or terminate..
+        if (subWorkflow.getStatus().isTerminal()) {
+            if (parentWorkflow.getStatus().equals(WorkflowStatus.FAILED)) {
+                String warningMsg = String.format("Not evaluating parent workflow: %s in FAILED state for subworkflow: %s in terminal state.",
+                        parentWorkflow.getWorkflowId(), subWorkflow.getWorkflowId());
+                LOGGER.warn(warningMsg);
+                return false;
+            } else if (subWorkflowTask.getStatus().equals(IN_PROGRESS)) {
+                LOGGER.debug("Subworkflow: {} is {}, updating parent workflow: {}",
+                        subWorkflow.getWorkflowId(), subWorkflow.getStatus().name(), parentWorkflow.getWorkflowId());
+                SubWorkflow subWorkflowSystemTask = new SubWorkflow();
+                subWorkflowSystemTask.execute(subWorkflow, subWorkflowTask, this);
+                // Keep Subworkflow task's data consistent with Subworkflow's.
+                if (subWorkflowTask.getStatus().isTerminal() && subWorkflowTask.getExternalOutputPayloadStoragePath() != null && !subWorkflowTask.getOutputData().isEmpty()) {
+                    Map<String, Object> parentWorkflowTaskOutputData = subWorkflowTask.getOutputData();
+                    deciderService.populateTaskData(subWorkflowTask);
+                    subWorkflowTask.getOutputData().putAll(parentWorkflowTaskOutputData);
+                    deciderService.externalizeTaskData(subWorkflowTask);
+                }
+                return true;
+            } else {
+                LOGGER.warn("Unable to evaluate parent workflow: {} in status: {}, and subworkflow: {} in status: {}",
+                        parentWorkflow.getWorkflowId(), parentWorkflow.getStatus().name(),
+                        subWorkflow.getWorkflowId(), subWorkflow.getStatus().name());
+            }
+        } else {
+            // On workflow retry or restart..
+            if (StringUtils.isBlank(parentDef.getFailureWorkflow()) && parentWorkflow.getStatus().isTerminal() && subWorkflowTask.getStatus().isTerminal()) {
+                LOGGER.debug("Subworkflow: {} is {}, resetting failed parent workflow: {}, and Subworkflow task: {} status to IN_PROGRESS",
+                        subWorkflow.getWorkflowId(), subWorkflow.getStatus().name(), parentWorkflow.getWorkflowId(), subWorkflow.getParentWorkflowTaskId());
+                subWorkflowTask.setStatus(IN_PROGRESS);
+                executionDAOFacade.updateTask(subWorkflowTask);
+                parentWorkflow.setStatus(WorkflowStatus.RUNNING);
+                executionDAOFacade.updateWorkflow(parentWorkflow);
+                return true;
+            } else if (parentWorkflow.getStatus().equals(WorkflowStatus.RUNNING)) {
+                if (subWorkflowTask.getStatus().isTerminal()) {
+                    String errorMsg = String.format("Subworkflow: %s is in RUNNING state, but Subworkflow task: %s in parent workflow: %s is in FAILED state.",
+                            subWorkflow.getWorkflowId(),subWorkflowTask.getTaskId(), parentWorkflow.getWorkflowId());
+                    LOGGER.warn(errorMsg);
+                    throw new IllegalStateException(errorMsg);
+                } else {
+                    // parentWorkflow, subWorkflowTask and subWorkflow are in non-terminal state
+                    return false;
+                }
+            } else {
+                LOGGER.warn("Unable to evaluate parent workflow: {} in status: {}, and subworkflow: {} in status: {}",
+                        parentWorkflow.getWorkflowId(), parentWorkflow.getStatus().name(),
+                        subWorkflow.getWorkflowId(), subWorkflow.getStatus().name());
+            }
+        }
+        return false;
     }
 }
