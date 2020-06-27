@@ -13,6 +13,7 @@
 package com.netflix.conductor.core.orchestration;
 
 import static com.netflix.conductor.core.execution.WorkflowExecutor.DECIDER_QUEUE;
+import static com.netflix.conductor.core.execution.WorkflowExecutor.isSystemTask;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.conductor.common.metadata.events.EventExecution;
@@ -339,6 +340,15 @@ public class ExecutionDAOFacade {
                 }
                 if (task.getStatus().isTerminal() && task.getEndTime() == 0) {
                     task.setEndTime(System.currentTimeMillis());
+                }
+
+                if (task.getStatus().isTerminal()) {
+                    // In terminal state, monitor completion of tasks
+                    if (isSystemTask.test(task)) {
+                        Monitors.recordSystemTaskCompleted(task.getTaskDefName());
+                    } else {
+                        Monitors.recordTaskCompleted(task.getTaskDefName());
+                    }
                 }
             }
             executionDAO.updateTask(task);
