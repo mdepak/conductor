@@ -158,7 +158,7 @@ public interface ElasticSearchConfiguration extends Configuration {
     }
 
     default int getAsyncMaxPoolSize() {
-        return  getIntProperty(ELASTIC_SEARCH_ASYNC_DAO_MAX_POOL_SIZE, DEFAULT_ASYNC_MAX_POOL_SIZE);
+        return  200;
     }
 
     default int getAsyncBufferFlushTimeout() {
