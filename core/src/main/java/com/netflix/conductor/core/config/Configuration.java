@@ -49,6 +49,9 @@ public interface Configuration {
     String SYSTEM_TASK_WORKER_ISOLATED_THREAD_COUNT_PROPERTY_NAME = "workflow.isolated.system.task.worker.thread.count";
     int SYSTEM_TASK_WORKER_ISOLATED_THREAD_COUNT_DEFAULT_VALUE = 1;
 
+    String SYSTEM_TASK_MAX_POLL_COUNT_PROPERTY_NAME = "workflow.system.task.queue.pollCount";
+    int SYSTEM_TASK_MAX_POLL_COUNT_DEFAULT_VALUE = 1;
+
     String ENVIRONMENT_PROPERTY_NAME = "environment";
     String ENVIRONMENT_DEFAULT_VALUE = "test";
 
@@ -90,6 +93,9 @@ public interface Configuration {
     String EVENT_MESSAGE_INDEXING_ENABLED_PROPERTY_NAME = "workflow.event.message.indexing.enabled";
     boolean EVENT_MESSAGE_INDEXING_ENABLED_DEFAULT_VALUE = true;
 
+    String EVENT_EXECUTION_INDEXING_ENABLED_PROPERTY_NAME = "workflow.event.execution.indexing.enabled";
+    boolean EVENT_EXECUTION_INDEXING_ENABLED_DEFAULT_VALUE = true;
+
     String TASKEXECLOG_INDEXING_ENABLED_PROPERTY_NAME = "workflow.taskExecLog.indexing.enabled";
     boolean TASKEXECLOG_INDEXING_ENABLED_DEFAULT_VALUE = true;
 
@@ -121,6 +127,8 @@ public interface Configuration {
 
     String ELASTIC_SEARCH_DOCUMENT_TYPE_OVERRIDE_PROPERTY_NAME = "workflow.elasticsearch.document.type.override";
     String ELASTIC_SEARCH_DOCUMENT_TYPE_OVERRIDE_DEFAULT_VALUE = "";
+
+    String EVENT_QUEUE_POLL_SCHEDULER_THREAD_COUNT_PROPERTY_NAME = "workflow.event.queue.scheduler.poll.thread.count";
 
     //TODO add constants for input/output external payload related properties.
 
@@ -201,6 +209,13 @@ public interface Configuration {
     }
 
     /**
+     * @return the max number of system task to poll from queues
+     */
+    default int getSystemTaskMaxPollCount() {
+        return getIntProperty(SYSTEM_TASK_MAX_POLL_COUNT_PROPERTY_NAME, SYSTEM_TASK_MAX_POLL_COUNT_DEFAULT_VALUE);
+    }
+
+    /**
      * @return time frequency in seconds, at which the workflow sweeper should run to evaluate running workflows.
      */
     int getSweepFrequency();
@@ -221,6 +236,11 @@ public interface Configuration {
      * @return when set to true, message from the event processing are indexed
      */
     boolean isEventMessageIndexingEnabled();
+
+    /**
+     * @return when set to true, event execution results are indexed
+     */
+    boolean isEventExecutionIndexingEnabled();
 
     /**
      * @return ID of the server.  Can be host name, IP address or any other meaningful identifier.  Used for logging
@@ -346,6 +366,15 @@ public interface Configuration {
         return getIntProperty(WORKFLOW_ARCHIVAL_DELAY_QUEUE_WORKER_THREAD_COUNT_PROPERTY_NAME, WORKFLOW_ARCHIVAL_DELAY_QUEUE_WORKER_THREAD_COUNT_DEFAULT_VALUE);
     }
 
+
+    /**
+     * @return the number of threads to be use in Scheduler used for polling events from multiple event queues.
+     * By default, a thread count equal to the number of CPU cores is chosen.
+     */
+    default int getEventSchedulerPollThreadCount()
+    {
+        return getIntProperty(EVENT_QUEUE_POLL_SCHEDULER_THREAD_COUNT_PROPERTY_NAME, Runtime.getRuntime().availableProcessors());
+    }
 
     /**
      * @param name         Name of the property

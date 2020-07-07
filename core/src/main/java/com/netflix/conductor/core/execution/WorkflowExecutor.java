@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Netflix, Inc.
+ * Copyright 2020 Netflix, Inc.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -426,24 +426,26 @@ public class WorkflowExecutor {
 
 
     /**
-     * @param workflowId the id of the workflow for which callbacks are to be reset
+     * @param workflowId the id of the workflow for which task callbacks are to be reset
      * @throws ApplicationException if the workflow is in terminal state
      */
-    public void resetCallbacksForInProgressTasks(String workflowId) {
+    public void resetCallbacksForWorkflow(String workflowId) {
         Workflow workflow = executionDAOFacade.getWorkflowById(workflowId, true);
         if (workflow.getStatus().isTerminal()) {
             throw new ApplicationException(CONFLICT, "Workflow is in terminal state. Status =" + workflow.getStatus());
         }
 
-        // Get tasks that have callbackAfterSeconds > 0 and set the callbackAfterSeconds to 0
-        for (Task task : workflow.getTasks()) {
-            if (task.getCallbackAfterSeconds() > 0) {
+        // Get SIMPLE tasks in SCHEDULED state that have callbackAfterSeconds > 0 and set the callbackAfterSeconds to 0
+        workflow.getTasks().stream()
+            .filter(task -> !isSystemTask.test(task)
+                && SCHEDULED.equals(task.getStatus())
+                && task.getCallbackAfterSeconds() > 0)
+            .forEach(task -> {
                 if (queueDAO.resetOffsetTime(QueueUtils.getQueueName(task), task.getTaskId())) {
                     task.setCallbackAfterSeconds(0);
                     executionDAOFacade.updateTask(task);
                 }
-            }
-        }
+            });
     }
 
     public String rerun(RerunWorkflowRequest request) {
@@ -683,6 +685,29 @@ public class WorkflowExecutor {
         try {
             executionLockService.acquireLock(workflow.getWorkflowId(), 60000);
 
+            List<Task> tasks = workflow.getTasks();
+            // Remove from the task queue if they were there
+            tasks.forEach(task -> queueDAO.remove(QueueUtils.getQueueName(task), task.getTaskId()));
+
+            // Update non-terminal tasks' status to CANCELED
+            for (Task task : tasks) {
+                if (!task.getStatus().isTerminal()) {
+                    // Cancel the ones which are not completed yet....
+                    task.setStatus(CANCELED);
+                    if (isSystemTask.test(task)) {
+                        WorkflowSystemTask workflowSystemTask = WorkflowSystemTask.get(task.getTaskType());
+                        try {
+                            workflowSystemTask.cancel(workflow, task, this);
+                        } catch (Exception e) {
+                            throw new ApplicationException(Code.INTERNAL_ERROR,
+                                String.format("Error canceling system task: %s/%s", workflowSystemTask.getName(),
+                                    task.getTaskId()), e);
+                        }
+                    }
+                    executionDAOFacade.updateTask(task);
+                }
+            }
+
             if (!workflow.getStatus().isTerminal()) {
                 workflow.setStatus(WorkflowStatus.TERMINATED);
             }
@@ -697,29 +722,6 @@ public class WorkflowExecutor {
             String workflowId = workflow.getWorkflowId();
             workflow.setReasonForIncompletion(reason);
             executionDAOFacade.updateWorkflow(workflow);
-
-            List<Task> tasks = workflow.getTasks();
-            for (Task task : tasks) {
-                if (!task.getStatus().isTerminal()) {
-                    // Cancel the ones which are not completed yet....
-                    task.setStatus(CANCELED);
-                    if (isSystemTask.test(task)) {
-                        WorkflowSystemTask stt = WorkflowSystemTask.get(task.getTaskType());
-                        try {
-                            stt.cancel(workflow, task, this);
-                        } catch (Exception e) {
-                            throw new ApplicationException(
-                                    Code.INTERNAL_ERROR,
-                                    String.format("Error canceling systems task: %s", stt.getName()),
-                                    e
-                            );
-                        }
-                    }
-                    executionDAOFacade.updateTask(task);
-                }
-                // And remove from the task queue if they were there
-                queueDAO.remove(QueueUtils.getQueueName(task), task.getTaskId());
-            }
 
             // If the following lines, for some reason fails, the sweep will take
             // care of this again!
