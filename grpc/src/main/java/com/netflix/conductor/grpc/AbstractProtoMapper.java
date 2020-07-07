@@ -464,6 +464,9 @@ public abstract class AbstractProtoMapper {
             to.setVersion( from.getVersion() );
         }
         to.putAllTaskToDomain( from.getTaskToDomain() );
+        if (from.getWorkflowDefinition() != null) {
+            to.setWorkflowDefinition( toProto( from.getWorkflowDefinition() ) );
+        }
         return to.build();
     }
 
@@ -472,6 +475,9 @@ public abstract class AbstractProtoMapper {
         to.setName( from.getName() );
         to.setVersion( from.getVersion() );
         to.setTaskToDomain( from.getTaskToDomainMap() );
+        if (from.hasWorkflowDefinition()) {
+            to.setWorkflowDefinition( fromProto( from.getWorkflowDefinition() ) );
+        }
         return to;
     }
 
@@ -696,6 +702,9 @@ public abstract class AbstractProtoMapper {
         if (from.getOwnerEmail() != null) {
             to.setOwnerEmail( from.getOwnerEmail() );
         }
+        if (from.getPollTimeoutSeconds() != null) {
+            to.setPollTimeoutSeconds( from.getPollTimeoutSeconds() );
+        }
         return to.build();
     }
 
@@ -722,6 +731,7 @@ public abstract class AbstractProtoMapper {
         to.setIsolationGroupId( from.getIsolationGroupId() );
         to.setExecutionNameSpace( from.getExecutionNameSpace() );
         to.setOwnerEmail( from.getOwnerEmail() );
+        to.setPollTimeoutSeconds( from.getPollTimeoutSeconds() );
         return to;
     }
 

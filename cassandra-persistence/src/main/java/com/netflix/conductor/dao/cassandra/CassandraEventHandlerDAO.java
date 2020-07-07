@@ -20,6 +20,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.netflix.conductor.annotations.Trace;
 import com.netflix.conductor.cassandra.CassandraConfiguration;
 import com.netflix.conductor.common.metadata.events.EventHandler;
 import com.netflix.conductor.core.execution.ApplicationException;
@@ -36,15 +37,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
+@Trace
 public class CassandraEventHandlerDAO extends CassandraBaseDAO implements EventHandlerDAO {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraEventHandlerDAO.class);
     private static final String CLASS_NAME = CassandraEventHandlerDAO.class.getSimpleName();
 
-    private Map<String, EventHandler> eventHandlerCache = new HashMap<>();
+    private volatile Map<String, EventHandler> eventHandlerCache = new HashMap<>();
 
     private final PreparedStatement insertEventHandlerStatement;
     private final PreparedStatement selectAllEventHandlersStatement;
@@ -114,6 +118,10 @@ public class CassandraEventHandlerDAO extends CassandraBaseDAO implements EventH
     }
 
     private void refreshEventHandlersCache() {
+        if (session.isClosed()) {
+            LOGGER.warn("session is closed");
+            return;
+        }
         try {
             Map<String, EventHandler> map = new HashMap<>();
             getAllEventHandlersFromDB().forEach(eventHandler -> map.put(eventHandler.getName(), eventHandler));

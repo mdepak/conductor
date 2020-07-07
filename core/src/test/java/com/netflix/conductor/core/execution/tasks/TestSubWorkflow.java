@@ -211,7 +211,7 @@ public class TestSubWorkflow {
         subWorkflowInstance.setStatus(Workflow.WorkflowStatus.TIMED_OUT);
         subWorkflowInstance.setReasonForIncompletion("unit2");
         assertTrue(subWorkflow.execute(workflowInstance, task, workflowExecutor));
-        assertEquals(Task.Status.FAILED, task.getStatus());
+        assertEquals(Task.Status.TIMED_OUT, task.getStatus());
         assertEquals("unit2", task.getReasonForIncompletion());
 
         subWorkflowInstance.setStatus(Workflow.WorkflowStatus.TERMINATED);
@@ -279,5 +279,30 @@ public class TestSubWorkflow {
     public void testIsAsync() {
         SubWorkflow subWorkflow = new SubWorkflow();
         assertTrue(subWorkflow.isAsync());
+    }
+
+    @Test
+    public void testStartSubWorkflowWithSubWorkflowDefinition() {
+        WorkflowDef workflowDef = new WorkflowDef();
+        Workflow workflowInstance = new Workflow();
+        workflowInstance.setWorkflowDefinition(workflowDef);
+
+        WorkflowDef subWorkflowDef = new WorkflowDef();
+        subWorkflowDef.setName("subWorkflow_1");
+
+        Task task = new Task();
+        task.setOutputData(new HashMap<>());
+
+        Map<String, Object> inputData = new HashMap<>();
+        inputData.put("subWorkflowName", "UnitWorkFlow");
+        inputData.put("subWorkflowVersion", 2);
+        inputData.put("subWorkflowDefinition", subWorkflowDef);
+        task.setInputData(inputData);
+
+        when(workflowExecutor.startWorkflow(eq(subWorkflowDef), eq(inputData), eq(null), any(), eq(0), any(), any(), eq(null), any()))
+            .thenReturn("workflow_1");
+
+        subWorkflow.start(workflowInstance, task, workflowExecutor);
+        assertEquals("workflow_1", task.getSubWorkflowId());
     }
 }

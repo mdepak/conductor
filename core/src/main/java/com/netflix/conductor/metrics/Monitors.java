@@ -1,5 +1,5 @@
-/**
- * Copyright 2016 Netflix, Inc.
+/*
+ * Copyright 2020 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,9 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-/**
- *
  */
 package com.netflix.conductor.metrics;
 
@@ -245,6 +242,22 @@ public class Monitors {
 		counter(classQualifier, "event_queue_messages_handled", "queueType", queueType, "queueName", queueName);
 	}
 
+	public static void recordEventQueueMessagesError(String queueType, String queueName) {
+		counter(classQualifier, "event_queue_messages_error", "queueType", queueType, "queueName", queueName);
+	}
+
+	public static void recordEventExecutionSuccess(String event, String handler, String action) {
+		counter(classQualifier, "event_execution_success", "event", event, "handler", handler, "action", action);
+	}
+
+	public static void recordEventExecutionError(String event, String handler, String action, String exceptionClazz) {
+		counter(classQualifier, "event_execution_error", "event", event, "handler", handler, "action", action, "exception", exceptionClazz);
+	}
+
+	public static void recordEventActionError(String action, String entityName, String event) {
+		counter(classQualifier, "event_action_error", "action", action, "entityName", entityName, "event", event);
+	}
+
 	public static void recordDaoRequests(String dao, String action, String taskType, String workflowType) {
 		counter(classQualifier, "dao_requests", "dao", dao, "action", action, "taskType", taskType, "workflowType", workflowType);
 	}
@@ -282,7 +295,7 @@ public class Monitors {
 	}
 
 	public static void recordDiscardedIndexingCount(String queueType) {
-		getCounter(Monitors.classQualifier, "discarded_index_count", "queueType", queueType).increment();
+		counter(Monitors.classQualifier, "discarded_index_count", "queueType", queueType);
 	}
 
 	public static void recordAcquireLockUnsuccessful() {
@@ -291,5 +304,9 @@ public class Monitors {
 
 	public static void recordAcquireLockFailure(String exceptionClassName) {
 		counter(classQualifier, "acquire_lock_failure", "exceptionType", exceptionClassName);
+	}
+
+	public static void recordSystemTaskWorkerPollingLimited(String queueName) {
+		counter(classQualifier, "system_task_worker_polling_limited", "queueName", queueName);
 	}
 }
