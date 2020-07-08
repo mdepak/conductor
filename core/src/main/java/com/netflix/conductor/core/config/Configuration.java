@@ -35,7 +35,7 @@ public interface Configuration {
     String DISABLE_ASYNC_WORKERS_DEFAULT_VALUE = "false";
 
     String SYSTEM_TASK_WORKER_THREAD_COUNT_PROPERTY_NAME = "workflow.system.task.worker.thread.count";
-    int SYSTEM_TASK_WORKER_THREAD_COUNT_DEFAULT_VALUE = 200;
+    int SYSTEM_TASK_WORKER_THREAD_COUNT_DEFAULT_VALUE = 400;
 
     String SYSTEM_TASK_WORKER_CALLBACK_SECONDS_PROPERTY_NAME = "workflow.system.task.worker.callback.seconds";
     int SYSTEM_TASK_WORKER_CALLBACK_SECONDS_DEFAULT_VALUE = 30;
@@ -50,7 +50,7 @@ public interface Configuration {
     int SYSTEM_TASK_WORKER_ISOLATED_THREAD_COUNT_DEFAULT_VALUE = 1;
 
     String SYSTEM_TASK_MAX_POLL_COUNT_PROPERTY_NAME = "workflow.system.task.queue.pollCount";
-    int SYSTEM_TASK_MAX_POLL_COUNT_DEFAULT_VALUE = 1;
+    int SYSTEM_TASK_MAX_POLL_COUNT_DEFAULT_VALUE = 25;
 
     String ENVIRONMENT_PROPERTY_NAME = "environment";
     String ENVIRONMENT_DEFAULT_VALUE = "test";
@@ -117,7 +117,7 @@ public interface Configuration {
     String WORKFLOW_ARCHIVAL_DELAY_SECS_PROPERTY_NAME = "workflow.archival.delay.seconds";
 
     String WORKFLOW_ARCHIVAL_DELAY_QUEUE_WORKER_THREAD_COUNT_PROPERTY_NAME = "workflow.archival.delay.queue.worker.thread.count";
-    int WORKFLOW_ARCHIVAL_DELAY_QUEUE_WORKER_THREAD_COUNT_DEFAULT_VALUE = 5;
+    int WORKFLOW_ARCHIVAL_DELAY_QUEUE_WORKER_THREAD_COUNT_DEFAULT_VALUE = 20;
 
     String OWNER_EMAIL_MANDATORY_NAME = "workflow.owner.email.mandatory";
     boolean OWNER_EMAIL_MANDATORY_DEFAULT_VALUE = true;
@@ -298,6 +298,7 @@ public interface Configuration {
         return getBooleanProperty(JERSEY_ENABLED_PROPERTY_NAME, JERSEY_ENABLED_DEFAULT_VALUE);
     }
 
+
     /**
      * @return true if owner email is mandatory for task definitions and workflow definitions
      */
@@ -477,6 +478,6 @@ public interface Configuration {
     }
 
     enum LOCKING_SERVER {
-        NOOP_LOCK, REDIS, ZOOKEEPER
+        NOOP_LOCK, REDIS, ZOOKEEPER, LOCAL_ONLY
     }
 }
