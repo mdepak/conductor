@@ -112,6 +112,7 @@ public class ArchivingWithTTLWorkflowStatusListener implements WorkflowStatusLis
                 Monitors.recordArchivalDelayQueueSize(scheduledThreadPoolExecutor.getQueue().size());
             } catch (Exception e) {
                 LOGGER.error("Unable to archive workflow: {}", workflowId, e);
+                Monitors.recordWorkflowArchivalFailure(workflowName, status);
             }
         }
     }

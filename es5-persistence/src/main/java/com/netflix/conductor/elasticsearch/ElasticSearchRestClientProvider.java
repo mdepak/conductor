@@ -30,7 +30,9 @@ public class ElasticSearchRestClientProvider implements Provider<RestClient> {
 
     @Override
     public RestClient get() {
-        return RestClient.builder(convertToHttpHosts(configuration.getURIs())).build();
+        return RestClient.builder(convertToHttpHosts(configuration.getURIs()))
+                .setRequestConfigCallback(requestConfigBuilder -> requestConfigBuilder.setConnectionRequestTimeout(10000))
+                .build();
     }
 
     private HttpHost[] convertToHttpHosts(List<URI> hosts) {

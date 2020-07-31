@@ -325,11 +325,20 @@ public class Monitors {
 	public static void recordArchivalDelayQueueSize(int val) {
 		getGauge(classQualifier, "workflow_archival_delay_queue_size").set(val);
 	}
+
+	public static void recordWorkflowArchivalFailure(String workflowType, WorkflowStatus status) {
+		counter(classQualifier, "workflow_archival_failure", "workflowName", workflowType, "workflowStatus", status.name());
+	}
+
+	public static void recordIndexQueueType(String docType, int val) {
+		getGauge(classQualifier, "index_request_queue_size", "docType", docType).set(val);
+	}
+
 	public static void recordDiscardedArchivalCount() {
 		counter(classQualifier, "discarded_archival_count");
 	}
 
-  public static void recordSystemTaskWorkerPollingLimited(String queueName) {
+   public static void recordSystemTaskWorkerPollingLimited(String queueName) {
 		counter(classQualifier, "system_task_worker_polling_limited", "queueName", queueName);
 	}
 
