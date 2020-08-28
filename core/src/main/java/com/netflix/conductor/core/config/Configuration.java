@@ -374,7 +374,7 @@ public interface Configuration {
      */
     default int getEventSchedulerPollThreadCount()
     {
-        return getIntProperty(EVENT_QUEUE_POLL_SCHEDULER_THREAD_COUNT_PROPERTY_NAME, 50);
+        return getIntProperty(EVENT_QUEUE_POLL_SCHEDULER_THREAD_COUNT_PROPERTY_NAME, Runtime.getRuntime().availableProcessors());
     }
 
     /**

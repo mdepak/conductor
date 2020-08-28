@@ -138,7 +138,6 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
     private final int indexBatchSize;
     private final int asyncBufferFlushTimeout;
     private final ElasticSearchConfiguration config;
-    private final ConcurrentHashMap<String, Integer> indexRequestCountByType;
 
     static {
         SIMPLE_DATE_FORMAT.setTimeZone(GMT);
@@ -188,8 +187,6 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
             });
 
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(this::flushBulkRequests, 60, 30, TimeUnit.SECONDS);
-
-        indexRequestCountByType = new ConcurrentHashMap<>();
     }
 
     @PreDestroy
@@ -415,7 +412,6 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
             logger.debug("Time taken {} for indexing workflow: {}", endTime - startTime, workflowId);
             Monitors.recordESIndexTime("index_workflow", WORKFLOW_DOC_TYPE, endTime - startTime);
             Monitors.recordWorkerQueueSize("indexQueue", ((ThreadPoolExecutor) executorService).getQueue().size());
-            onAsyncIndexRequestProcessed(WORKFLOW_DOC_TYPE);
         } catch (Exception e) {
             Monitors.error(className, "indexWorkflow");
             logger.error("Failed to index workflow: {}", workflow.getWorkflowId(), e);
@@ -424,7 +420,6 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
 
     @Override
     public CompletableFuture<Void> asyncIndexWorkflow(Workflow workflow) {
-        onAsyncIndexRequestAdded(WORKFLOW_DOC_TYPE);
         return CompletableFuture.runAsync(() -> indexWorkflow(workflow), executorService);
     }
 
@@ -440,7 +435,6 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
             logger.debug("Time taken {} for  indexing task:{} in workflow: {}", endTime - startTime, taskId, task.getWorkflowInstanceId());
             Monitors.recordESIndexTime("index_task", TASK_DOC_TYPE, endTime - startTime);
             Monitors.recordWorkerQueueSize("indexQueue", ((ThreadPoolExecutor) executorService).getQueue().size());
-            onAsyncIndexRequestProcessed(TASK_DOC_TYPE);
         } catch (Exception e) {
             logger.error("Failed to index task: {}", task.getTaskId(), e);
         }
@@ -448,7 +442,6 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
 
     @Override
     public CompletableFuture<Void> asyncIndexTask(Task task) {
-        onAsyncIndexRequestAdded(TASK_DOC_TYPE);
         return CompletableFuture.runAsync(() -> indexTask(task), executorService);
     }
 
@@ -498,22 +491,6 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
     @Override
     public CompletableFuture<Void> asyncAddTaskExecutionLogs(List<TaskExecLog> logs) {
         return CompletableFuture.runAsync(() -> addTaskExecutionLogs(logs), logExecutorService);
-    }
-
-    private void onAsyncIndexRequestAdded(String docType) {
-        synchronized (indexRequestCountByType) {
-            int count = indexRequestCountByType.getOrDefault(docType, 0) + 1;
-            indexRequestCountByType.put(docType, count);
-            Monitors.recordIndexQueueType(docType, count);
-        }
-    }
-
-    private void onAsyncIndexRequestProcessed(String docType) {
-        synchronized (indexRequestCountByType) {
-            int count = indexRequestCountByType.getOrDefault(docType, 0) - 1;
-            indexRequestCountByType.put(docType, count);
-            Monitors.recordIndexQueueType(docType, count);
-        }
     }
 
     @Override
