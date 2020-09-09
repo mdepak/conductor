@@ -63,14 +63,18 @@ public class RedisLockModule extends AbstractModule{
                 redisConfig.useSingleServer()
                         .setAddress(redisServerAddress)
                         .setPassword(redisServerPassword)
-                        .setTimeout(connectionTimeout);
+                        .setTimeout(connectionTimeout)
+                        .setConnectionPoolSize(clusterConfiguration.getRedisLockingClientConnectionPoolSize());
                 break;
             case CLUSTER:
                 redisConfig.useClusterServers()
                         .setScanInterval(2000) // cluster state scan interval in milliseconds
                         .addNodeAddress(redisServerAddress.split(","))
                         .setPassword(redisServerPassword)
-                        .setTimeout(connectionTimeout);
+                        .setTimeout(connectionTimeout)
+                        // only setting master connection pool size since locks are acquired on the master nodes
+                        .setMasterConnectionPoolSize(clusterConfiguration.getRedisLockingClientConnectionPoolSize());
+
                 break;
             case SENTINEL:
                 redisConfig.useSentinelServers()
@@ -78,7 +82,9 @@ public class RedisLockModule extends AbstractModule{
                         .setMasterName(masterName)
                         .addSentinelAddress(redisServerAddress)
                         .setPassword(redisServerPassword)
-                        .setTimeout(connectionTimeout);
+                        .setTimeout(connectionTimeout)
+                        // only setting master connection pool size since locks are acquired on the master nodes
+                        .setMasterConnectionPoolSize(clusterConfiguration.getRedisLockingClientConnectionPoolSize());
                 break;
         }
 

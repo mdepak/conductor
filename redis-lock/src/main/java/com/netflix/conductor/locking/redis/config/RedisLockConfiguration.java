@@ -28,6 +28,8 @@ public interface RedisLockConfiguration extends Configuration {
     String REDIS_SERVER_PASSWORD_DEFAULT_VALUE = null;
     String REDIS_SERVER_MASTER_NAME_PROP_NAME = "workflow.redis.locking.server.master.name";
     String REDIS_SERVER_MASTER_NAME_DEFAULT_VALUE = "master";
+    String REDIS_LOCKING_CLIENT_CONNECTION_POOL_SIZE_PROP_NAME = "workflow.redis.locking.client.connectionPoolSize";
+    int REDIS_LOCKING_CLIENT_CONNECTION_POOL_SIZE_DEFAULT_VALUE = 64;
 
 
     default REDIS_SERVER_TYPE getRedisServerType() {
@@ -48,6 +50,10 @@ public interface RedisLockConfiguration extends Configuration {
 
     default String getRedisServerMasterName() {
         return getProperty(REDIS_SERVER_MASTER_NAME_PROP_NAME, REDIS_SERVER_MASTER_NAME_DEFAULT_VALUE);
+    }
+
+    default int getRedisLockingClientConnectionPoolSize(){
+        return getIntProperty(REDIS_LOCKING_CLIENT_CONNECTION_POOL_SIZE_PROP_NAME, REDIS_LOCKING_CLIENT_CONNECTION_POOL_SIZE_DEFAULT_VALUE);
     }
 
     enum REDIS_SERVER_TYPE {
