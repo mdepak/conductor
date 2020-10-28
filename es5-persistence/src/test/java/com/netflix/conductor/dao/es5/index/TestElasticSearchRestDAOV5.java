@@ -366,7 +366,7 @@ public class TestElasticSearchRestDAOV5 {
         task.setTaskDefName("some-task-def-name");
         task.setReasonForIncompletion("some-failure-reason");
 
-        indexDAO.indexTask(task);
+        indexDAO.updateTask(task);
 
         await()
                 .atMost(5, TimeUnit.SECONDS)
@@ -395,8 +395,8 @@ public class TestElasticSearchRestDAOV5 {
         task.setTaskDefName("some-task-def-name");
         task.setReasonForIncompletion("some-failure-reason");
 
-        indexDAO.indexTask(task);
-        indexDAO.indexTask(task);
+        indexDAO.updateTask(task);
+        indexDAO.updateTask(task);
 
         await()
                 .atMost(5, TimeUnit.SECONDS)

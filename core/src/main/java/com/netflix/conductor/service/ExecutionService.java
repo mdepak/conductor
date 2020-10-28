@@ -156,16 +156,23 @@ public class ExecutionService {
 					logger.debug("RateLimit Execution limited for {}:{}, limit:{}", taskId, task.getTaskDefName(), task.getRateLimitPerFrequency());
 					continue;
 				}
-
+				boolean isFirstTime = false;
 				task.setStatus(Status.IN_PROGRESS);
 				if (task.getStartTime() == 0) {
 					task.setStartTime(System.currentTimeMillis());
 					Monitors.recordQueueWaitTime(task.getTaskDefName(), task.getQueueWaitTime());
+					isFirstTime = true;
 				}
 				task.setCallbackAfterSeconds(0);    // reset callbackAfterSeconds when giving the task to the worker
 				task.setWorkerId(workerId);
 				task.setPollCount(task.getPollCount() + 1);
-				executionDAOFacade.updateTask(task);
+				if(isFirstTime)
+				{
+					executionDAOFacade.createTask(task);
+				}else
+				{
+					executionDAOFacade.updateTask(task);
+				}
 				tasks.add(task);
 			} catch (Exception e) {
 				// db operation failed for dequeued message, re-enqueue with a delay

@@ -79,12 +79,12 @@ public class MockIndexDAO implements IndexDAO {
 	}
 
 	@Override
-	public void indexTask(Task task) {
+	public void updateTask(Task task) {
 		
 	}
 
 	@Override
-	public CompletableFuture<Void> asyncIndexTask(Task task) {
+	public CompletableFuture<Void> asyncUpdateTask(Task task) {
 		return null;
 	}
 

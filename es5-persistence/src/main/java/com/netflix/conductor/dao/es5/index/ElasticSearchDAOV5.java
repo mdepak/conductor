@@ -32,6 +32,9 @@ import com.netflix.conductor.dao.IndexDAO;
 import com.netflix.conductor.dao.es5.index.query.parser.Expression;
 import com.netflix.conductor.elasticsearch.ElasticSearchConfiguration;
 import com.netflix.conductor.elasticsearch.query.parser.ParserException;
+import com.netflix.conductor.elasticsearch.rollover.IndexManager;
+import com.netflix.conductor.elasticsearch.rollover.IndexNameProvider;
+import com.netflix.conductor.elasticsearch.rollover.listener.RetryListenerProvider;
 import com.netflix.conductor.metrics.Monitors;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,6 +61,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
+import javax.annotation.Nullable;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -65,8 +69,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.ResourceAlreadyExistsException;
 import org.elasticsearch.action.DocWriteResponse;
+import org.elasticsearch.action.admin.indices.alias.Alias;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
+import org.elasticsearch.action.admin.indices.rollover.RolloverRequest;
+import org.elasticsearch.action.admin.indices.rollover.RolloverResponse;
 import org.elasticsearch.action.admin.indices.template.get.GetIndexTemplatesResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -82,6 +89,7 @@ import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.IndexNotFoundException;
@@ -114,12 +122,15 @@ public class ElasticSearchDAOV5 implements IndexDAO {
     private static final String className = ElasticSearchDAOV5.class.getSimpleName();
 
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyyMMWW");
+    private static final SimpleDateFormat CONDUCTOR_INDEX_DATE_FORMAT= new SimpleDateFormat("MM-dd-yyyy");
     private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
     private static final int RETRY_COUNT = 3;
 
     private final String indexName;
     private String logIndexName;
     private final String logIndexPrefix;
+    private final String indexNamePrefix;
+    private final String indexAliasName;
     private final ObjectMapper objectMapper;
     private final Client elasticSearchClient;
     private final ExecutorService executorService;
@@ -129,23 +140,30 @@ public class ElasticSearchDAOV5 implements IndexDAO {
     private final int indexBatchSize;
     private final int asyncBufferFlushTimeout;
     private final ElasticSearchConfiguration config;
+    private final IndexManager indexManager;
+    private final RetryListenerProvider retryListenerProvider;
 
     static {
         SIMPLE_DATE_FORMAT.setTimeZone(GMT);
+        CONDUCTOR_INDEX_DATE_FORMAT.setTimeZone(GMT);
     }
 
     @Inject
     public ElasticSearchDAOV5(Client elasticSearchClient, ElasticSearchConfiguration config,
-        ObjectMapper objectMapper) {
+                              ObjectMapper objectMapper, IndexManager indexManager, RetryListenerProvider retryListenerProvider) {
         this.objectMapper = objectMapper;
         this.elasticSearchClient = elasticSearchClient;
         this.indexName = config.getIndexName();
+        this.indexNamePrefix = config.getIndexName();
+        this.indexAliasName = config.getIndexName();
         this.logIndexPrefix = config.getTasklogIndexName();
         this.archiveSearchBatchSize = config.getArchiveSearchBatchSize();
         this.bulkRequests = new ConcurrentHashMap<>();
         this.indexBatchSize = config.getIndexBatchSize();
         this.asyncBufferFlushTimeout = config.getAsyncBufferFlushTimeout();
         this.config = config;
+        this.indexManager = indexManager;
+        this.retryListenerProvider = retryListenerProvider;
 
         int corePoolSize = 4;
         int maximumPoolSize = config.getAsyncMaxPoolSize();
@@ -175,6 +193,7 @@ public class ElasticSearchDAOV5 implements IndexDAO {
             });
 
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(this::flushBulkRequests, 60, 30, TimeUnit.SECONDS);
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(this::rollOverIndex, 60, 30, TimeUnit.SECONDS);
     }
 
     @PreDestroy
@@ -220,7 +239,8 @@ public class ElasticSearchDAOV5 implements IndexDAO {
 
         //1. Create the required index
         try {
-            addIndex(indexName);
+            String newIndexName = this.indexNamePrefix + "_" + CONDUCTOR_INDEX_DATE_FORMAT.format(new Date());
+            addIndex(newIndexName, null);
         } catch (Exception e) {
             logger.error("Failed to initialize index '{}'", indexName, e);
         }
@@ -238,10 +258,48 @@ public class ElasticSearchDAOV5 implements IndexDAO {
         } catch (IOException e) {
             logger.error("Failed to add {} mapping", TASK_DOC_TYPE);
         }
-
     }
 
-    private void addIndex(String indexName) {
+    private void rollOverIndex()
+    {
+       String newIndexName = this.indexNamePrefix + "_" + CONDUCTOR_INDEX_DATE_FORMAT.format(new Date());
+
+        CreateIndexRequest createIndexRequest = new CreateIndexRequest(indexName);
+
+        createIndexRequest.alias(new Alias(indexAliasName));
+
+        createIndexRequest.settings(Settings.builder()
+                .put("index.number_of_shards", config.getElasticSearchIndexShardCount())
+                .put("index.number_of_replicas", config.getElasticSearchIndexReplicationCount())
+        );
+
+        RolloverRequest rollOverRequest = new RolloverRequest(indexAliasName, newIndexName);
+        rollOverRequest .addMaxIndexAgeCondition(new TimeValue(2, TimeUnit.MINUTES));
+        rollOverRequest.dryRun(true);
+        rollOverRequest.setCreateIndexRequest(createIndexRequest);
+
+        RolloverResponse rolloverResponse = elasticSearchClient.admin()
+                .indices().rolloversIndex(rollOverRequest).actionGet();
+
+        logger.info("Rolled over to the new index "  + rolloverResponse.getNewIndex());
+
+        // Add Mappings for the workflow document type
+        try {
+            addMappingToIndex(newIndexName, WORKFLOW_DOC_TYPE, "/mappings_docType_workflow.json");
+        } catch (Exception e) {
+            logger.error("Failed to add {} mapping", WORKFLOW_DOC_TYPE);
+        }
+
+        //Add Mappings for task document type
+        try {
+            addMappingToIndex(newIndexName, TASK_DOC_TYPE, "/mappings_docType_task.json");
+        } catch (IOException e) {
+            logger.error("Failed to add {} mapping", TASK_DOC_TYPE);
+        }
+    }
+
+
+    private void addIndex(String indexName, @Nullable String aliasName) {
         try {
             elasticSearchClient.admin()
                     .indices()
@@ -251,8 +309,12 @@ public class ElasticSearchDAOV5 implements IndexDAO {
                     .actionGet();
         } catch (IndexNotFoundException infe) {
             try {
-
                 CreateIndexRequest createIndexRequest = new CreateIndexRequest(indexName);
+
+                if(aliasName != null)
+                {
+                    createIndexRequest.alias(new Alias(aliasName));
+                }
                 createIndexRequest.settings(Settings.builder()
                         .put("index.number_of_shards", config.getElasticSearchIndexShardCount())
                         .put("index.number_of_replicas", config.getElasticSearchIndexReplicationCount())
@@ -390,7 +452,7 @@ public class ElasticSearchDAOV5 implements IndexDAO {
     }
 
     @Override
-    public void indexTask(Task task) {
+    public void updateTask(Task task) {
         try {
             long startTime = Instant.now().toEpochMilli();
             String id = task.getTaskId();
@@ -412,8 +474,8 @@ public class ElasticSearchDAOV5 implements IndexDAO {
     }
 
     @Override
-    public CompletableFuture<Void> asyncIndexTask(Task task) {
-        return CompletableFuture.runAsync(() -> indexTask(task), executorService);
+    public CompletableFuture<Void> asyncUpdateTask(Task task) {
+        return CompletableFuture.runAsync(() -> updateTask(task), executorService);
     }
 
     @Override
@@ -620,19 +682,19 @@ public class ElasticSearchDAOV5 implements IndexDAO {
     }
 
     @Override
-    public void updateWorkflow(String workflowInstanceId, String[] keys, Object[] values) {
+    public void updateWorkflow(Workflow workflow, String[] keys, Object[] values) {
         if (keys.length != values.length) {
             throw new ApplicationException(Code.INVALID_INPUT,
                 "Number of keys and values do not match");
         }
 
         long startTime = Instant.now().toEpochMilli();
-        UpdateRequest request = new UpdateRequest(indexName, WORKFLOW_DOC_TYPE, workflowInstanceId);
+        UpdateRequest request = new UpdateRequest(indexName, WORKFLOW_DOC_TYPE, workflow.getWorkflowId());
         Map<String, Object> source = IntStream.range(0, keys.length)
             .boxed()
             .collect(Collectors.toMap(i -> keys[i], i -> values[i]));
         request.doc(source);
-        logger.debug("Updating workflow {} in elasticsearch index: {}", workflowInstanceId, indexName);
+        logger.debug("Updating workflow {} in elasticsearch index: {}", workflow.getWorkflowId(), indexName);
         new RetryUtil<>().retryOnException(
             () -> elasticSearchClient.update(request).actionGet(),
             null,
@@ -643,15 +705,15 @@ public class ElasticSearchDAOV5 implements IndexDAO {
         );
 
         long endTime = Instant.now().toEpochMilli();
-        logger.debug("Time taken {} for updating workflow: {}", endTime - startTime, workflowInstanceId);
+        logger.debug("Time taken {} for updating workflow: {}", endTime - startTime, workflow.getWorkflowId());
         Monitors.recordESIndexTime("update_workflow", WORKFLOW_DOC_TYPE, endTime - startTime);
         Monitors.recordWorkerQueueSize("indexQueue", ((ThreadPoolExecutor) executorService).getQueue().size());
     }
 
     @Override
-    public CompletableFuture<Void> asyncUpdateWorkflow(String workflowInstanceId, String[] keys,
+    public CompletableFuture<Void> asyncUpdateWorkflow(Workflow workflow, String[] keys,
         Object[] values) {
-        return CompletableFuture.runAsync(() -> updateWorkflow(workflowInstanceId, keys, values), executorService);
+        return CompletableFuture.runAsync(() -> updateWorkflow(workflow, keys, values), executorService);
     }
 
     @Override

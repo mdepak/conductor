@@ -28,6 +28,8 @@ import com.google.common.base.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -92,9 +94,10 @@ public class RetryUtil<T> {
                               Predicate<Throwable> throwablePredicate,
                               Predicate<T> resultRetryPredicate,
                               int retryCount,
-                              String shortDescription, String operationName) throws RuntimeException {
+                              String shortDescription, String operationName,
+                              List<RetryListener> listeners) throws RuntimeException {
 
-        Retryer<T> retryer = RetryerBuilder.<T>newBuilder()
+        RetryerBuilder builder = RetryerBuilder.<T>newBuilder()
                 .retryIfException(Optional.ofNullable(throwablePredicate).orElse(exception -> true))
                 .retryIfResult(Optional.ofNullable(resultRetryPredicate).orElse(result -> false))
                 .withWaitStrategy(WaitStrategies.join(
@@ -110,8 +113,14 @@ public class RetryUtil<T> {
                                 attempt.getAttemptNumber(), attempt.getDelaySinceFirstAttempt(), operationName, shortDescription);
                         internalNumberOfRetries.incrementAndGet();
                     }
-                })
-                .build();
+                });
+
+        for(RetryListener listener : listeners)
+        {
+            builder.withRetryListener(listener);
+        }
+
+        Retryer<T> retryer =builder.build();
 
         try {
             return retryer.call(supplierCommand::get);
@@ -122,9 +131,18 @@ public class RetryUtil<T> {
             throw new RuntimeException(errorMessage, executionException.getCause());
         } catch (RetryException retryException) {
             String errorMessage = format("Operation '%s:%s' failed after retrying %d times, retry limit %d", operationName,
-                    shortDescription, internalNumberOfRetries.get(), 3);
+                    shortDescription, internalNumberOfRetries.get(), retryCount);
             logger.error(errorMessage, retryException.getLastFailedAttempt().getExceptionCause());
             throw new RuntimeException(errorMessage, retryException.getLastFailedAttempt().getExceptionCause());
         }
+    }
+
+    @SuppressWarnings("Guava")
+    public T retryOnException(Supplier<T> supplierCommand,
+                              Predicate<Throwable> throwablePredicate,
+                              Predicate<T> resultRetryPredicate,
+                              int retryCount,
+                              String shortDescription, String operationName) throws RuntimeException{
+        return this.retryOnException(supplierCommand, throwablePredicate, resultRetryPredicate, retryCount, shortDescription, operationName, Collections.emptyList());
     }
 }

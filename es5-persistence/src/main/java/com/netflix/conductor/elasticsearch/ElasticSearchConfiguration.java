@@ -78,8 +78,22 @@ public interface ElasticSearchConfiguration extends Configuration {
     String ELASTIC_SEARCH_TASK_LOG_RESULT_LIMIT = "tasklog.elasticsearch.query.size";
     int ELASTIC_SEARCH_TASK_LOG_RESULT_LIMIT_DEFAULT_VALUE = 10;
 
+    String ELASTIC_SEARCH_ROLLOVER_INDEX_ENABLED_PROPERTY_NAME = "workflow.elasticsearch.rollover.index.enabled";
+    boolean ELASTIC_SEARCH_ROLLOVER_INDEX_ENABLED_DEFAULT_VALUE = false;
+
+    String ELASTIC_SEARCH_ROLLOVER_MAX_AGE_CONDITION_PROPERTY_NAME = "workflow.elasticsearch.rollover.index.conduction.maxAge";
+    String ELASTIC_SEARCH_ROLLOVER_MAX_DOCS_CONDITION_PROPERTY_NAME = "workflow.elasticsearch.rollover.index.conduction.maxDocs";
+    String ELASTIC_SEARCH_ROLLOVER_MAX_SIZE_CONDITION_PROPERTY_NAME = "workflow.elasticsearch.rollover.index.conduction.maxSize";
+
+    String ELASTIC_SEARCH_ROLLOVER_INDEX_ALIAS_NAME_PROPERTY_NAME = "workflow.elasticsearch.rollover.index.alias.name";
+    String ELASTIC_SEARCH_ROLLOVER_INDEX_ALIAS_NAME_DEFAULT_VALUE = "conductor";
+
     default String getURL() {
         return getProperty(ELASTIC_SEARCH_URL_PROPERTY_NAME, ELASTIC_SEARCH_URL_DEFAULT_VALUE);
+    }
+
+    default boolean isRolloverIndexingEnabled() {
+        return getBooleanProperty(ELASTIC_SEARCH_ROLLOVER_INDEX_ENABLED_PROPERTY_NAME, ELASTIC_SEARCH_ROLLOVER_INDEX_ENABLED_DEFAULT_VALUE);
     }
 
     default List<URI> getURIs(){
@@ -137,6 +151,23 @@ public interface ElasticSearchConfiguration extends Configuration {
             elasticSearchInstanceType = ElasticSearchInstanceType.valueOf(instanceTypeConfig.toUpperCase());
         }
         return elasticSearchInstanceType;
+    }
+
+    default String getElasticSearchRolloverMaxAgeCondition() {
+        return getProperty(ELASTIC_SEARCH_ROLLOVER_MAX_AGE_CONDITION_PROPERTY_NAME, "3m");
+    }
+
+    default String getElasticSearchRolloverMaxDocsCondition() {
+        return getProperty(ELASTIC_SEARCH_ROLLOVER_MAX_DOCS_CONDITION_PROPERTY_NAME, "5000");
+    }
+
+    default String getElasticSearchRolloverMaxSizeCondition() {
+        return getProperty(ELASTIC_SEARCH_ROLLOVER_MAX_SIZE_CONDITION_PROPERTY_NAME, null);
+    }
+
+    default String getElasticSearchRolloverIndexAliasName()
+    {
+        return getProperty(ELASTIC_SEARCH_ROLLOVER_INDEX_ALIAS_NAME_PROPERTY_NAME, ELASTIC_SEARCH_ROLLOVER_INDEX_ALIAS_NAME_DEFAULT_VALUE);
     }
 
     enum ElasticSearchInstanceType {
