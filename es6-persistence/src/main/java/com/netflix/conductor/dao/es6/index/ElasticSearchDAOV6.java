@@ -351,7 +351,7 @@ public class ElasticSearchDAOV6 extends ElasticSearchBaseDAO implements IndexDAO
     }
 
     @Override
-    public void indexTask(Task task) {
+    public void updateTask(Task task) {
         try {
             long startTime = Instant.now().toEpochMilli();
             String id = task.getTaskId();
@@ -373,8 +373,8 @@ public class ElasticSearchDAOV6 extends ElasticSearchBaseDAO implements IndexDAO
     }
 
     @Override
-    public CompletableFuture<Void> asyncIndexTask(Task task) {
-        return CompletableFuture.runAsync(() -> indexTask(task), executorService);
+    public CompletableFuture<Void> asyncUpdateTask(Task task) {
+        return CompletableFuture.runAsync(() -> updateTask(task), executorService);
     }
 
     private void indexObject(UpdateRequest req, String docType) {
@@ -631,18 +631,18 @@ public class ElasticSearchDAOV6 extends ElasticSearchBaseDAO implements IndexDAO
     }
 
     @Override
-    public void updateWorkflow(String workflowInstanceId, String[] keys, Object[] values) {
+    public void updateWorkflow(Workflow workflow, String[] keys, Object[] values) {
         if (keys.length != values.length) {
             throw new ApplicationException(ApplicationException.Code.INVALID_INPUT,
                 "Number of keys and values do not match");
         }
 
         long startTime = Instant.now().toEpochMilli();
-        UpdateRequest request = new UpdateRequest(workflowIndexName, WORKFLOW_DOC_TYPE, workflowInstanceId);
+        UpdateRequest request = new UpdateRequest(workflowIndexName, WORKFLOW_DOC_TYPE, workflow.getWorkflowId());
         Map<String, Object> source = IntStream.range(0, keys.length).boxed()
             .collect(Collectors.toMap(i -> keys[i], i -> values[i]));
         request.doc(source);
-        LOGGER.debug("Updating workflow {} in elasticsearch index: {}", workflowInstanceId, workflowIndexName);
+        LOGGER.debug("Updating workflow {} in elasticsearch index: {}", workflow.getWorkflowId(), workflowIndexName);
         new RetryUtil<>().retryOnException(
             () -> elasticSearchClient.update(request).actionGet(),
             null,
@@ -652,14 +652,14 @@ public class ElasticSearchDAOV6 extends ElasticSearchBaseDAO implements IndexDAO
             "updateWorkflow"
         );
         long endTime = Instant.now().toEpochMilli();
-        LOGGER.debug("Time taken {} for updating workflow: {}", endTime - startTime, workflowInstanceId);
+        LOGGER.debug("Time taken {} for updating workflow: {}", endTime - startTime, workflow.getWorkflowId());
         Monitors.recordESIndexTime("update_workflow", WORKFLOW_DOC_TYPE, endTime - startTime);
         Monitors.recordWorkerQueueSize("indexQueue", ((ThreadPoolExecutor) executorService).getQueue().size());
     }
 
     @Override
-    public CompletableFuture<Void> asyncUpdateWorkflow(String workflowInstanceId, String[] keys, Object[] values) {
-        return CompletableFuture.runAsync(() -> updateWorkflow(workflowInstanceId, keys, values), executorService);
+    public CompletableFuture<Void> asyncUpdateWorkflow(Workflow workflow, String[] keys, Object[] values) {
+        return CompletableFuture.runAsync(() -> updateWorkflow(workflow, keys, values), executorService);
     }
 
     @Override

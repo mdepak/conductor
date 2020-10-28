@@ -452,6 +452,7 @@ public class WorkflowExecutor {
             .forEach(task -> {
                 if (queueDAO.resetOffsetTime(QueueUtils.getQueueName(task), task.getTaskId())) {
                     task.setCallbackAfterSeconds(0);
+                    //FIXME: Since task index might already be created, update here.
                     executionDAOFacade.updateTask(task);
                 }
             });
@@ -736,6 +737,7 @@ public class WorkflowExecutor {
                                     task.getTaskId()), e);
                         }
                     }
+                    //TODO: Task will be already scheduled
                     executionDAOFacade.updateTask(task);
                 }
             }
@@ -998,7 +1000,7 @@ public class WorkflowExecutor {
                         // FIXME: temporary hack to workaround TERMINATE task
                         if (TERMINATE.name().equals(task.getTaskType())) {
                             deciderService.externalizeTaskData(task);
-                            executionDAOFacade.updateTask(task);
+                            executionDAOFacade.createTask(task);
                             if (workflowInstance.getStatus().equals(WorkflowStatus.COMPLETED)) {
                                 completeWorkflow(workflow);
                             } else {
@@ -1224,7 +1226,8 @@ public class WorkflowExecutor {
             LOGGER.debug("Executing {}/{}-{}", task.getTaskType(), task.getTaskId(), task.getStatus());
             if (task.getStatus() == SCHEDULED || !systemTask.isAsyncComplete(task)) {
                 task.setPollCount(task.getPollCount() + 1);
-                executionDAOFacade.updateTask(task);
+                //TODO: Create task index
+                executionDAOFacade.createTask(task);
             }
 
             deciderService.populateTaskData(task);
@@ -1350,6 +1353,8 @@ public class WorkflowExecutor {
 
             // Save the tasks in the DAO
             createdTasks = executionDAOFacade.createTasks(tasks);
+            //FIXME: Additional candidate for the task indexing
+
 
             List<Task> systemTasks = createdTasks.stream()
                     .filter(isSystemTask)
@@ -1380,7 +1385,8 @@ public class WorkflowExecutor {
                     }
                     startedSystemTasks = true;
                     deciderService.externalizeTaskData(task);
-                    executionDAOFacade.updateTask(task);
+                    //TODO: Create task index
+                    executionDAOFacade.createTask(task);
                 } else {
                     tasksToBeQueued.add(task);
                 }
@@ -1448,6 +1454,7 @@ public class WorkflowExecutor {
                 failureWorkflow = (String) workflow.getInput().get(name);
             }
         }
+        //TODO: Let it update.
         if (tw.task != null) {
             executionDAOFacade.updateTask(tw.task);
         }

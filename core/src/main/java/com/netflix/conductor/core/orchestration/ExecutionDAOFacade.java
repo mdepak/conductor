@@ -28,6 +28,7 @@ import com.netflix.conductor.core.config.Configuration;
 import com.netflix.conductor.core.events.queue.Message;
 import com.netflix.conductor.core.execution.ApplicationException;
 import com.netflix.conductor.core.execution.ApplicationException.Code;
+import com.netflix.conductor.core.execution.SystemTaskType;
 import com.netflix.conductor.dao.ExecutionDAO;
 import com.netflix.conductor.dao.IndexDAO;
 import com.netflix.conductor.dao.PollDataDAO;
@@ -225,13 +226,20 @@ public class ExecutionDAOFacade {
                 scheduledThreadPoolExecutor.schedule(delayWorkflowUpdate, config.getAsyncUpdateDelay(), TimeUnit.SECONDS);
                 Monitors.recordWorkerQueueSize("delayQueue", scheduledThreadPoolExecutor.getQueue().size());
             } else {
-                indexDAO.asyncIndexWorkflow(workflow);
+                indexDAO.asyncUpdateWorkflow(workflow);
             }
 			if (workflow.getStatus().isTerminal()) {
-				workflow.getTasks().forEach(indexDAO::asyncIndexTask);
+			    if(!config.enableAsyncIndexing())
+                {
+                    //Since the task
+                    workflow.getTasks().forEach(indexDAO::asyncUpdateTask);
+                }
+			    else{
+			        workflow.getTasks().forEach(indexDAO::asyncCreateTask);
+                }
 			}
         } else {
-            indexDAO.indexWorkflow(workflow);
+            indexDAO.updateWorkflow(workflow);
         }
         return workflow.getWorkflowId();
     }
@@ -270,7 +278,7 @@ public class ExecutionDAOFacade {
             if (workflow.getStatus().isTerminal()) {
                 // Only allow archival if workflow is in terminal state
                 // DO NOT archive async, since if archival errors out, workflow data will be lost
-                indexDAO.updateWorkflow(workflow.getWorkflowId(),
+                indexDAO.updateWorkflow(workflow,
                         new String[]{RAW_JSON_FIELD, ARCHIVED_FIELD},
                         new Object[]{objectMapper.writeValueAsString(workflow), true});
             } else {
@@ -385,7 +393,7 @@ public class ExecutionDAOFacade {
              * If it *is* enabled, tasks will be indexed only when a workflow is in terminal state.
              */
             if (!config.enableAsyncIndexing()) {
-            	indexDAO.indexTask(task);
+            	indexDAO.updateTask(task);
             }
         } catch (Exception e) {
             String errorMsg = String.format("Error updating task: %s in workflow: %s", task.getTaskId(), task.getWorkflowInstanceId());
@@ -393,6 +401,44 @@ public class ExecutionDAOFacade {
             throw new ApplicationException(ApplicationException.Code.BACKEND_ERROR, errorMsg, e);
         }
     }
+
+    public void createTask(Task task)
+    {
+        try {
+            if (task.getStatus() != null) {
+                if (!task.getStatus().isTerminal() || (task.getStatus().isTerminal() && task.getUpdateTime() == 0)) {
+                    task.setUpdateTime(System.currentTimeMillis());
+                }
+                if (task.getStatus().isTerminal() && task.getEndTime() == 0) {
+                    task.setEndTime(System.currentTimeMillis());
+                }
+            }
+
+            try {
+                if (task.getStatus() == Task.Status.COMPLETED && !SystemTaskType.is(task.getTaskType())) {
+                    throw new RuntimeException("Incorrect state");
+                }
+            } catch (Exception ex) {
+                LOGGER.error("Create task should not be called in this case ", ex);
+            }
+
+            executionDAO.updateTask(task);
+            /*
+             * Indexing a task for every update adds a lot of volume. That is ok but if async indexing
+             * is enabled and tasks are stored in memory until a block has completed, we would lose a lot
+             * of tasks on a system failure. So only index for each update if async indexing is not enabled.
+             * If it *is* enabled, tasks will be indexed only when a workflow is in terminal state.
+             */
+            if (!config.enableAsyncIndexing()) {
+                indexDAO.createTask(task);
+            }
+        } catch (Exception e) {
+            String errorMsg = String.format("Error updating task: %s in workflow: %s", task.getTaskId(), task.getWorkflowInstanceId());
+            LOGGER.error(errorMsg, e);
+            throw new ApplicationException(ApplicationException.Code.BACKEND_ERROR, errorMsg, e);
+        }
+    }
+
 
     public void updateTasks(List<Task> tasks) {
         tasks.forEach(this::updateTask);
@@ -512,7 +558,7 @@ public class ExecutionDAOFacade {
         public void run() {
             try {
                 Workflow workflow = executionDAO.getWorkflow(workflowId, false);
-                indexDAO.asyncIndexWorkflow(workflow);
+                indexDAO.asyncUpdateWorkflow(workflow);
             } catch (Exception e) {
                 LOGGER.error("Unable to update workflow: {}", workflowId, e);
             }
