@@ -85,15 +85,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -652,16 +644,21 @@ public class ElasticSearchDAOV5 implements IndexDAO {
     }
 
     private void indexWithRetry(BulkRequestBuilderWrapper request, String docType) {
-        BulkResponse response = null;
         try {
             long startTime = Instant.now().toEpochMilli();
-            response = new RetryUtil<BulkResponse>().retryOnException(
+            new RetryUtil<BulkResponse>().retryOnException(
                     () -> request.execute().actionGet(5, TimeUnit.SECONDS),
                     null,
                     BulkResponse::hasFailures,
                     RETRY_COUNT,
                     "Bulk Indexing "+ docType,
-                    "indexObject"
+                    "indexObject",
+                    //TODO: Remove after debugging
+                    Collections.emptyList(),
+                    (response) -> logger.error("Failed to index {} for ids : {}", docType, Arrays.stream(response.getItems())
+                            .filter(BulkItemResponse::isFailed)
+                            .map(BulkItemResponse::getId)
+                            .collect(Collectors.joining(",")))
             );
             long endTime = Instant.now().toEpochMilli();
             logger.debug("Time taken {} for indexing object of type: {}", endTime - startTime, docType);
@@ -669,29 +666,25 @@ public class ElasticSearchDAOV5 implements IndexDAO {
         } catch (Exception e) {
             Monitors.error(className, "index");
             logger.error("Failed to index object of type: {}", docType, e);
-            //TODO: Remove after debugging
-            if (response != null) {
-                String failedTasks = Arrays.stream(response.getItems())
-                        .filter(BulkItemResponse::isFailed)
-                        .map(BulkItemResponse::getId)
-                        .collect(Collectors.joining(","));
-                logger.error("Failed to index {} for ids : {}", docType, failedTasks);
-            }
         }
     }
 
     private void updateWithRetry(final BulkUpdateRequestsWrapper request, String docType) {
-        BulkResponse response = null;
         try {
             long startTime = Instant.now().toEpochMilli();
-            response = new RetryUtil<BulkResponse>().retryOnException(
+            new RetryUtil<BulkResponse>().retryOnException(
                     () -> elasticSearchClient.bulk(request.constructBulkRequest()).actionGet(5, TimeUnit.SECONDS),
                     null,
                     BulkResponse::hasFailures,
                     RETRY_COUNT,
                     "Bulk updating "+ docType,
                     "updateObject",
-                    retryListenerProvider.getBulkUpdateRequestRetryListeners(request)
+                    retryListenerProvider.getBulkUpdateRequestRetryListeners(request),
+                    //TODO: Remove after debugging
+                    (response) -> logger.error("Failed to index {} for ids : {}", docType, Arrays.stream(response.getItems())
+                            .filter(BulkItemResponse::isFailed)
+                            .map(BulkItemResponse::getId)
+                            .collect(Collectors.joining(",")))
             );
             long endTime = Instant.now().toEpochMilli();
             logger.debug("Time taken {} for updating object of type: {}", endTime - startTime, docType);
@@ -699,14 +692,6 @@ public class ElasticSearchDAOV5 implements IndexDAO {
         } catch (Exception e) {
             Monitors.error(className, "updateObject");
             logger.error("Failed to update object of type: {}", docType, e);
-            //TODO: Remove after debugging
-            if (response != null) {
-                String failedTasks = Arrays.stream(response.getItems())
-                        .filter(BulkItemResponse::isFailed)
-                        .map(BulkItemResponse::getId)
-                        .collect(Collectors.joining(","));
-                logger.error("Failed to index {} for ids : {}", docType, failedTasks);
-            }
         }
     }
 

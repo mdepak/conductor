@@ -1,3 +1,15 @@
+/*
+ * Copyright 2020 Netflix, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package com.netflix.conductor.elasticsearch.rollover;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +36,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -110,22 +124,22 @@ public class IndexManagerDAOV5 implements IndexManager {
         }
     }
 
-    private void updateIndexMappings(String newIndexName) throws IOException {
-        PutMappingRequest putMappingRequest = new PutMappingRequest(newIndexName);
+    private void updateIndexMappings(String newIndexName){
+        putMappings(newIndexName, "/mappings_docType_workflow.json",ElasticSearchRestDAOV5.WORKFLOW_DOC_TYPE);
+        putMappings(newIndexName, "/mappings_docType_task.json",ElasticSearchRestDAOV5.TASK_DOC_TYPE);
+    }
 
-//        Map<String, Object> documentMappings = new HashMap<>();
+    private void putMappings(String indexName, String documentMappingFile, String documentType) {
+        try {
+            PutMappingRequest putMappingRequest = new PutMappingRequest(indexName);
+            ObjectNode node = objectMapper.readValue(this.getClass().getResourceAsStream(documentMappingFile), ObjectNode.class);
+            putMappingRequest.source(node.get(documentType).toString());
 
-        ObjectNode node = objectMapper.readValue(this.getClass().getResourceAsStream("/mappings_docType_workflow.json"), ObjectNode.class);
-//        documentMappings.put(ElasticSearchRestDAOV5.WORKFLOW_DOC_TYPE, );
-
-//        putMappingRequest.type(ElasticSearchRestDAOV5.WORKFLOW_DOC_TYPE);
-
-//        ObjectNode taskMappingNode = objectMapper.readValue(this.getClass().getResourceAsStream("/mappings_docType_task.json"), ObjectNode.class);
-//        documentMappings.put(ElasticSearchRestDAOV5.TASK_DOC_TYPE, taskMappingNode.get(ElasticSearchRestDAOV5.TASK_DOC_TYPE).toString());
-        putMappingRequest.source(node.get(ElasticSearchRestDAOV5.WORKFLOW_DOC_TYPE).toString());
-
-        PutMappingResponse response = elasticSearchClient.admin().indices().putMapping(putMappingRequest).actionGet();
-        LOGGER.info("PutMapping request for index {} isAcknowledged: {}", newIndexName, response.isAcknowledged());
+            PutMappingResponse response = elasticSearchClient.admin().indices().putMapping(putMappingRequest).actionGet();
+            LOGGER.info("PutMapping request for index {} isAcknowledged: {}", indexName, response.isAcknowledged());
+        } catch (IOException ex) {
+            LOGGER.error("Exception in adding mapping for the index " + indexName + " for document type " + documentType, ex);
+        }
     }
 
     @Override
@@ -143,19 +157,15 @@ public class IndexManagerDAOV5 implements IndexManager {
     }
 
     public List<Index> getAllIndexes() {
-        List<Index> indexNames = new ArrayList<>();
-
         GetIndexRequest request = new GetIndexRequest();
         request.addFeatures(GetIndexRequest.Feature.SETTINGS);
 
         GetIndexResponse response = elasticSearchClient.admin().indices().getIndex(request).actionGet();
 
-        for (String indexName : response.getIndices()) {
-            long indexCreationDate = Long.parseLong(response.getSettings().get(indexName).get("index.creation_date"));
-            indexNames.add(new Index(indexName, indexCreationDate));
-        }
-
-        return indexNames;
+        return Arrays.stream(response.getIndices())
+                .filter(indexName -> indexName.startsWith(config.getRolloverIndexNamePrefix()))
+                .map(indexName -> new Index(indexName, Long.parseLong(response.getSettings().get(indexName).get("index.creation_date"))))
+                .collect(Collectors.toList());
     }
 
     public void deleteOldRolledOverIndex() {
