@@ -161,7 +161,8 @@ public class ExecutionService {
 				task.setCallbackAfterSeconds(0);    // reset callbackAfterSeconds when giving the task to the worker
 				task.setWorkerId(workerId);
 				task.setPollCount(task.getPollCount() + 1);
-				if (isFirstTime) {
+				if(isFirstTime)
+				{	//Create the task index for the first time when the task start time is set.
 					executionDAOFacade.createTask(task);
 				} else {
 					executionDAOFacade.updateTask(task);

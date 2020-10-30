@@ -132,8 +132,13 @@ public class RetryUtil<T> {
         } catch (RetryException retryException) {
             String errorMessage = format("Operation '%s:%s' failed after retrying %d times, retry limit %d", operationName,
                     shortDescription, internalNumberOfRetries.get(), retryCount);
-            logger.error(errorMessage, retryException.getLastFailedAttempt().getExceptionCause());
-            throw new RuntimeException(errorMessage, retryException.getLastFailedAttempt().getExceptionCause());
+            if (retryException.getLastFailedAttempt().hasException()) {
+                logger.error(errorMessage, retryException.getLastFailedAttempt().getExceptionCause());
+                throw new RuntimeException(errorMessage, retryException.getLastFailedAttempt().getExceptionCause());
+            } else {
+                //When retry condition is not met, exception will not present
+                throw new RuntimeException(errorMessage + " with unsuccessful retryPredicate");
+            }
         }
     }
 

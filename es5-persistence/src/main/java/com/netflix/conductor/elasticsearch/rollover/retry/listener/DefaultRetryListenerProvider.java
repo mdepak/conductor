@@ -1,4 +1,4 @@
-package com.netflix.conductor.elasticsearch.rollover.listener;
+package com.netflix.conductor.elasticsearch.rollover.retry.listener;
 
 import com.github.rholder.retry.RetryListener;
 import com.netflix.conductor.dao.es5.index.BulkUpdateRequestsWrapper;
@@ -7,6 +7,8 @@ import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateResponse;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,7 +16,7 @@ import java.util.List;
 public class DefaultRetryListenerProvider implements RetryListenerProvider {
 
     @Override
-    public List<RetryListener> getUpdateRequestRetryListeners(IndexRequestWrapper updateRequest) {
+    public List<RetryListener> getUpdateRequestRetryListeners(IndexRequestWrapper<UpdateRequest, UpdateResponse> updateRequest) {
         return Collections.emptyList();
     }
 

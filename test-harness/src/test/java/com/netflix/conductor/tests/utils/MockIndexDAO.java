@@ -69,12 +69,12 @@ public class MockIndexDAO implements IndexDAO {
 	}
 
 	@Override
-	public void updateWorkflow(String workflowInstanceId, String[] key, Object[] value) {
-		
+	public void updateWorkflow(Workflow workflow, String[] keys, Object[] values) {
+
 	}
 
 	@Override
-	public CompletableFuture<Void> asyncUpdateWorkflow(String workflowInstanceId, String[] keys, Object[] values) {
+	public CompletableFuture<Void> asyncUpdateWorkflow(Workflow workflow, String[] keys, Object[] values) {
 		return null;
 	}
 

@@ -414,6 +414,7 @@ public class ExecutionDAOFacade {
                 }
             }
 
+            //TODO: Remove this block after testing
             try {
                 if (task.getStatus() == Task.Status.COMPLETED && !SystemTaskType.is(task.getTaskType())) {
                     throw new RuntimeException("Incorrect state");

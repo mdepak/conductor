@@ -1,9 +1,10 @@
-package com.netflix.conductor.elasticsearch.rollover.listener;
+package com.netflix.conductor.elasticsearch.rollover.retry.listener;
 
 import com.github.rholder.retry.Attempt;
 import com.github.rholder.retry.RetryListener;
 import com.netflix.conductor.dao.es5.index.IndexRequestWrapper;
 import com.netflix.conductor.elasticsearch.rollover.IndexNameProvider;
+import com.netflix.conductor.elasticsearch.rollover.retry.validator.DocumentMissingValidator;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -16,16 +17,20 @@ public class RolloverUpdateListener implements RetryListener {
 
     private final IndexRequestWrapper<UpdateRequest, UpdateResponse> updateRequest;
     private final IndexNameProvider indexNameProvider;
+    private final DocumentMissingValidator documentMissingValidator;
 
-    public RolloverUpdateListener(IndexRequestWrapper<UpdateRequest, UpdateResponse> updateRequest, IndexNameProvider indexNameProvider) {
+    public RolloverUpdateListener(IndexRequestWrapper<UpdateRequest, UpdateResponse> updateRequest,
+                                  IndexNameProvider indexNameProvider,
+                                  DocumentMissingValidator documentMissingValidator) {
         this.updateRequest = updateRequest;
         this.indexNameProvider = indexNameProvider;
+        this.documentMissingValidator = documentMissingValidator;
     }
 
     @Override
     public <V> void onRetry(Attempt<V> attempt) {
         try {
-            if (!attempt.hasResult() && attempt.getExceptionCause()!= null && attempt.getExceptionCause().getLocalizedMessage().contains("document_missing_exception")) {
+            if (documentMissingValidator.getUpdateDocumentMissingValidator().test(attempt)) {
                 UpdateRequest oldRequest = updateRequest.getRequest();
                 String newIndexName = indexNameProvider.getWriteIndexName((int) attempt.getAttemptNumber(), updateRequest.getCreatedTime());
                 if (newIndexName == null) {
