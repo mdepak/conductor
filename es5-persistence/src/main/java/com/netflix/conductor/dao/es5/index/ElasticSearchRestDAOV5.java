@@ -992,17 +992,22 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
      * @param operationDescription The type of operation that we are performing.
      */
     private void indexWithRetry(final BulkRequest request, final String operationDescription, String docType) {
-        BulkResponse response = null;
         try {
             long startTime = Instant.now().toEpochMilli();
-            response = new RetryUtil<BulkResponse>().retryOnException(() -> {
+            new RetryUtil<BulkResponse>().retryOnException(() -> {
                 try {
                     return elasticSearchClient.bulk(request);
                 } catch (IOException e) {
                     logger.error("Bulk index failed for docType " + docType, e);
                     throw new RuntimeException(e);
                 }
-            }, null, null, RETRY_COUNT, operationDescription, "indexWithRetry");
+            }, null, null, RETRY_COUNT, operationDescription, "indexWithRetry",
+                    //TODO: Remove after debugging
+                    Collections.emptyList(),
+                    (response) -> logger.error("Failed to index {} for ids : {}", docType, Arrays.stream(response.getItems())
+                            .filter(BulkItemResponse::isFailed)
+                            .map(BulkItemResponse::getId)
+                            .collect(Collectors.joining(","))));
             long endTime = Instant.now().toEpochMilli();
             logger.debug("Time taken {} for indexing object of type: {}", endTime - startTime, docType);
             Monitors.recordESIndexTime("index_object", docType, endTime - startTime);
@@ -1011,14 +1016,6 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
         } catch (Exception e) {
             Monitors.error(className, "index");
             logger.error("Failed to index {} for request type: {}", request.toString(), docType, e);
-            //TODO: Remove after debugging
-            if (response != null) {
-                String failedTasks = Arrays.stream(response.getItems())
-                        .filter(BulkItemResponse::isFailed)
-                        .map(BulkItemResponse::getId)
-                        .collect(Collectors.joining(","));
-                logger.error("Failed to index {} for ids : {}", docType, failedTasks);
-            }
         }
     }
 
@@ -1030,10 +1027,9 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
      * @param operationDescription The type of operation that we are performing.
      */
     private void updateWithRetry(final BulkUpdateRequestsWrapper request, final String operationDescription, String docType) {
-        BulkResponse response = null;
         try {
             long startTime = Instant.now().toEpochMilli();
-            response = new RetryUtil<BulkResponse>().retryOnException(
+            new RetryUtil<BulkResponse>().retryOnException(
                     () -> {
                         try {
                             return elasticSearchClient.bulk(request.constructBulkRequest());
@@ -1047,7 +1043,12 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
                     RETRY_COUNT,
                     operationDescription,
                     "updateWithRetry",
-                    retryListenerProvider.getBulkUpdateRequestRetryListeners(request));
+                    retryListenerProvider.getBulkUpdateRequestRetryListeners(request),
+                    //TODO: Remove after debugging
+                    (response) -> logger.error("Failed to index {} for ids : {}", docType, Arrays.stream(response.getItems())
+                            .filter(BulkItemResponse::isFailed)
+                            .map(BulkItemResponse::getId)
+                            .collect(Collectors.joining(","))));
 
             long endTime = Instant.now().toEpochMilli();
             logger.debug("Time taken {} for bulk updating object of type: {}", endTime - startTime, docType);
@@ -1057,14 +1058,6 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
         } catch (Exception e) {
             Monitors.error(className, "updateObject");
             logger.error("Failed to update {} for request type: {}", request.toString(), docType, e);
-            //TODO: Remove after debugging
-            if (response != null) {
-                String failedTasks = Arrays.stream(response.getItems())
-                        .filter(BulkItemResponse::isFailed)
-                        .map(BulkItemResponse::getId)
-                        .collect(Collectors.joining(","));
-                logger.error("Failed to index {} for ids : {}", docType, failedTasks);
-            }
         }
     }
 
