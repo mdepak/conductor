@@ -56,6 +56,7 @@ public interface IndexDAO {
      */
     void updateTask(Task task);
 
+    //TODO: Remove the default implementation after V6 is also implemented
     /**
      * Create the task index
      * @param task task to be updated
@@ -64,6 +65,7 @@ public interface IndexDAO {
 
     }
 
+    //TODO: Remove the default implementation after V6 is also implemented
     /**
      *
      * @param task Task to be indexed asynchronously
@@ -115,10 +117,22 @@ public interface IndexDAO {
      */
     CompletableFuture<Void> asyncRemoveWorkflow(String workflowId);
 
+    //TODO: Remove the default implementation after V6 is also implemented
+
+    /**
+     * Update the workflow index
+     * @param workflow workflow to be updated
+     */
     default void updateWorkflow(Workflow workflow){
 
     }
 
+    //TODO: Remove the default implementation after V6 is also implemented
+    /**
+     * Update the workflow index async
+     * @param workflow workflow to be updated
+     * @return CompletableFuture of type void
+     */
     default CompletableFuture<Void> asyncUpdateWorkflow(Workflow workflow){
         return null;
     }

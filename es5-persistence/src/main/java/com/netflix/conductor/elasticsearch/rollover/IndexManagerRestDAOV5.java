@@ -8,9 +8,13 @@ import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.util.EntityUtils;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.rollover.RolloverResponse;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.common.unit.SizeUnit;
+import org.elasticsearch.common.unit.SizeValue;
+import org.elasticsearch.common.unit.TimeValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -44,7 +47,7 @@ public class IndexManagerRestDAOV5 implements IndexManager {
         this.config = config;
         this.objectMapper = objectMapper;
         this.indexNamePrefix = config.getIndexName();
-        this.indexAliasName = config.getElasticSearchRolloverIndexAliasName();
+        this.indexAliasName = config.getRolloverIndexAliasName();
         this.elasticSearchAdminClient = lowLevelRestClient;
         this.indexNameProvider = indexNameProvider;
 
@@ -66,16 +69,18 @@ public class IndexManagerRestDAOV5 implements IndexManager {
             ObjectNode requestParams = objectMapper.createObjectNode();
             ObjectNode rolloverCondition = objectMapper.createObjectNode();
 
-            if (config.getElasticSearchRolloverMaxAgeCondition() != null) {
-                rolloverCondition.put("max_age", config.getElasticSearchRolloverMaxAgeCondition());
+            if (config.getRolloverMaxAgeCondition() != null) {
+                //FIXME: Change to HOURS after testing
+                rolloverCondition.put("max_age", new TimeValue(config.getRolloverMaxAgeCondition(), TimeUnit.MINUTES).toString());
             }
 
-            if (config.getElasticSearchRolloverMaxDocsCondition() != null) {
-                rolloverCondition.put("max_docs", Integer.parseInt(config.getElasticSearchRolloverMaxDocsCondition()));
+            if (config.getRolloverMaxDocsCondition() != null) {
+                rolloverCondition.put("max_docs", config.getRolloverMaxDocsCondition());
             }
 
-            if (config.getElasticSearchRolloverMaxSizeCondition() != null) {
-                rolloverCondition.put("max_size", config.getElasticSearchRolloverMaxSizeCondition());
+            if (config.getRolloverMaxSizeCondition() != null) {
+                //FIXME: Change to GBS after testing
+                rolloverCondition.put("max_size", new SizeValue(config.getRolloverMaxSizeCondition(), SizeUnit.MEGA).toString());
             }
 
             requestParams.set("conditions", rolloverCondition);
@@ -130,8 +135,8 @@ public class IndexManagerRestDAOV5 implements IndexManager {
     }
 
     @Override
-    public Optional<String> getCurrentAliasIndexName() {
-        Optional<String> currentIndexName = Optional.empty();
+    public boolean isAliasIndexExists() {
+       boolean currentIndexName = false;
 
         try {
             Response indicesResponse = elasticSearchAdminClient
@@ -141,7 +146,7 @@ public class IndexManagerRestDAOV5 implements IndexManager {
                 {
                     currentIndexName = new BufferedReader(new InputStreamReader(indicesResponse.getEntity()
                             .getContent()))
-                            .lines().findFirst();
+                            .lines().findFirst().isPresent();
                 }
             }
         } catch (IOException e) {
@@ -174,8 +179,22 @@ public class IndexManagerRestDAOV5 implements IndexManager {
         return indexNames;
     }
 
-    public void deleteIndex()
-    {
+    public void deleteOldRolledOverIndex() throws IOException {
+        List<Index> indices = getAllIndexes();
+        if(indices.size() > config.getMaxBackupRolloverIndexToKeep())
+        {
+            String oldestIndexToDelete = Collections.min(indices).getName();
+            String resourcePath = "/" + oldestIndexToDelete;
 
+            Response response = elasticSearchAdminClient.performRequest(ElasticSearchRestDAOV5.HttpMethod.PUT, resourcePath, Collections.emptyMap());
+            if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                LOGGER.info("Deleted the rolled over index : {}", oldestIndexToDelete);
+            }
+        }
+    }
+
+    @Override
+    public void updateIndex() {
+        this.indexNameProvider.updateIndices(getAllIndexes());
     }
 }

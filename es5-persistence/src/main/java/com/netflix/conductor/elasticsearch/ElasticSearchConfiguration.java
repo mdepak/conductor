@@ -14,6 +14,8 @@ package com.netflix.conductor.elasticsearch;
 
 import com.google.common.base.Strings;
 import com.netflix.conductor.core.config.Configuration;
+import org.apache.bval.util.StringUtils;
+
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
@@ -88,6 +90,19 @@ public interface ElasticSearchConfiguration extends Configuration {
     String ELASTIC_SEARCH_ROLLOVER_INDEX_ALIAS_NAME_PROPERTY_NAME = "workflow.elasticsearch.rollover.index.alias.name";
     String ELASTIC_SEARCH_ROLLOVER_INDEX_ALIAS_NAME_DEFAULT_VALUE = "conductor";
 
+    String ELASTIC_SEARCH_ROLLOVER_INDEX_NAME_PROPERTY_NAME = "workflow.elasticsearch.rollover.index.name.prefix";
+
+    String ELASTIC_SEARCH_INDEX_REQUEST_RETRY_COUNT_PROPERTY_NAME = "workflow.elasticsearch.index.request.retry.count";
+    //FIXME: Change retry count back to 3
+    int ELASTIC_SEARCH_INDEX_REQUEST_RETRY_COUNT_DEFAULT_VALUE = 5;
+
+    String ELASTIC_SEARCH_OLD_ROLLOVER_DELETION_ENABLED_PROPERTY_NAME = "workflow.elasticsearch.rollover.deletion.enabled";
+    boolean ELASTIC_SEARCH_OLD_ROLLOVER_DELETION_ENABLED_DEFAULT_VALUE = false;
+
+    String ELASTIC_SEARCH_ROLLOVER_MAX_BACKUP_INDEX_COUNT_PROPERTY_NAME = "workflow.elasticsearch.rollover.max.backup.index.count";
+    int ELASTIC_SEARCH_ROLLOVER_MAX_BACKUP_INDEX_COUNT_DEFAULT_VALUE = 3;
+
+
     default String getURL() {
         return getProperty(ELASTIC_SEARCH_URL_PROPERTY_NAME, ELASTIC_SEARCH_URL_DEFAULT_VALUE);
     }
@@ -153,21 +168,44 @@ public interface ElasticSearchConfiguration extends Configuration {
         return elasticSearchInstanceType;
     }
 
-    default String getElasticSearchRolloverMaxAgeCondition() {
-        return getProperty(ELASTIC_SEARCH_ROLLOVER_MAX_AGE_CONDITION_PROPERTY_NAME, "3m");
+    default Integer getRolloverMaxAgeCondition() {
+        String value = getProperty(ELASTIC_SEARCH_ROLLOVER_MAX_AGE_CONDITION_PROPERTY_NAME, "3");
+        return StringUtils.isBlank(value) ? null : Integer.parseInt(value);
     }
 
-    default String getElasticSearchRolloverMaxDocsCondition() {
-        return getProperty(ELASTIC_SEARCH_ROLLOVER_MAX_DOCS_CONDITION_PROPERTY_NAME, "5000");
+    default Integer getRolloverMaxDocsCondition() {
+        String value = getProperty(ELASTIC_SEARCH_ROLLOVER_MAX_DOCS_CONDITION_PROPERTY_NAME, "5000");
+        return StringUtils.isBlank(value) ? null : Integer.parseInt(value);
     }
 
-    default String getElasticSearchRolloverMaxSizeCondition() {
-        return getProperty(ELASTIC_SEARCH_ROLLOVER_MAX_SIZE_CONDITION_PROPERTY_NAME, null);
+    default Long getRolloverMaxSizeCondition() {
+        String value = getProperty(ELASTIC_SEARCH_ROLLOVER_MAX_SIZE_CONDITION_PROPERTY_NAME, "");
+        return StringUtils.isBlank(value) ? null : Long.parseLong(value);
     }
 
-    default String getElasticSearchRolloverIndexAliasName()
-    {
+    default String getRolloverIndexNamePrefix() {
+        return getProperty(ELASTIC_SEARCH_ROLLOVER_INDEX_NAME_PROPERTY_NAME, getIndexName());
+    }
+
+    default int getIndexRetryCount() {
+        return getIntProperty(ELASTIC_SEARCH_INDEX_REQUEST_RETRY_COUNT_PROPERTY_NAME, ELASTIC_SEARCH_INDEX_REQUEST_RETRY_COUNT_DEFAULT_VALUE);
+    }
+
+    default boolean isOldRolloverIndexDeletionEnabled() {
+        return getBooleanProperty(ELASTIC_SEARCH_OLD_ROLLOVER_DELETION_ENABLED_PROPERTY_NAME,
+                ELASTIC_SEARCH_OLD_ROLLOVER_DELETION_ENABLED_DEFAULT_VALUE);
+    }
+
+    default String getRolloverIndexAliasName() {
         return getProperty(ELASTIC_SEARCH_ROLLOVER_INDEX_ALIAS_NAME_PROPERTY_NAME, ELASTIC_SEARCH_ROLLOVER_INDEX_ALIAS_NAME_DEFAULT_VALUE);
+    }
+
+    /**
+     * @return returns the maximum number of rolled over indices to keep around.
+     */
+    default int getMaxBackupRolloverIndexToKeep() {
+        return getIntProperty(ELASTIC_SEARCH_ROLLOVER_MAX_BACKUP_INDEX_COUNT_PROPERTY_NAME,
+                ELASTIC_SEARCH_ROLLOVER_MAX_BACKUP_INDEX_COUNT_DEFAULT_VALUE);
     }
 
     enum ElasticSearchInstanceType {

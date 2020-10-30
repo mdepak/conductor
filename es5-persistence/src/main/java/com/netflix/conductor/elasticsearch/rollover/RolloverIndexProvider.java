@@ -56,6 +56,10 @@ public class RolloverIndexProvider implements IndexNameProvider {
             curIndex = creationTimeToNameMap.higherKey(curIndex);
         }
 
+        if (curIndex == null) {
+            return null;
+        }
+
         return creationTimeToNameMap.get(curIndex);
     }
 

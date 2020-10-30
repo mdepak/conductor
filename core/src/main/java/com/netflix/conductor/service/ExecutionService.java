@@ -167,7 +167,7 @@ public class ExecutionService {
 				task.setWorkerId(workerId);
 				task.setPollCount(task.getPollCount() + 1);
 				if(isFirstTime)
-				{
+				{	//Create the task index for the first time when the task start time is set.
 					executionDAOFacade.createTask(task);
 				}else
 				{

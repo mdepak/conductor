@@ -52,6 +52,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+
+import com.netflix.conductor.elasticsearch.rollover.DefaultIndexNameProvider;
+import com.netflix.conductor.elasticsearch.rollover.IndexManager;
+import com.netflix.conductor.elasticsearch.rollover.retry.listener.DefaultRetryListenerProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -73,6 +77,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,7 +135,10 @@ public class TestElasticSearchRestDAOV5 {
         restClient.performRequest("GET", "/_cluster/health", params);
 
         objectMapper = new JsonMapperProvider().get();
-        indexDAO = new ElasticSearchRestDAOV5(restClient, configuration, objectMapper);
+        IndexManager mockIndexManager = Mockito.mock(IndexManager.class);
+        Mockito.when(mockIndexManager.getIndexNameProvider()).thenReturn(new DefaultIndexNameProvider(configuration));
+
+        indexDAO = new ElasticSearchRestDAOV5(restClient, configuration, objectMapper, mockIndexManager, new DefaultRetryListenerProvider());
     }
 
     @AfterClass
@@ -248,7 +256,7 @@ public class TestElasticSearchRestDAOV5 {
         String[] keyChanges = {"workflowType"};
         String[] valueChanges = {newWorkflowType};
 
-        indexDAO.updateWorkflow(testId, keyChanges, valueChanges);
+        indexDAO.updateWorkflow(workflow, keyChanges, valueChanges);
 
         workflowType = indexDAO.get(testId, "workflowType");
         assertEquals("Should have updated our new workflow type", newWorkflowType, workflowType);
@@ -437,7 +445,10 @@ public class TestElasticSearchRestDAOV5 {
         restClient.performRequest("GET", "/_cluster/health", params);
 
         objectMapper = new JsonMapperProvider().get();
-        indexDAO = new ElasticSearchRestDAOV5(restClient, configuration, objectMapper);
+        IndexManager mockIndexManager = Mockito.mock(IndexManager.class);
+        Mockito.when(mockIndexManager.getIndexNameProvider()).thenReturn(new DefaultIndexNameProvider(configuration));
+
+        indexDAO = new ElasticSearchRestDAOV5(restClient, configuration, objectMapper, mockIndexManager, new DefaultRetryListenerProvider());
     }
 
     @Test

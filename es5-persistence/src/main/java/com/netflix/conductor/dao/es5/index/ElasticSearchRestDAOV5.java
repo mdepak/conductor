@@ -35,7 +35,7 @@ import com.netflix.conductor.dao.es5.index.query.parser.Expression;
 import com.netflix.conductor.elasticsearch.ElasticSearchConfiguration;
 import com.netflix.conductor.elasticsearch.rollover.IndexManager;
 import com.netflix.conductor.elasticsearch.rollover.RequestWrapper;
-import com.netflix.conductor.elasticsearch.rollover.listener.RetryListenerProvider;
+import com.netflix.conductor.elasticsearch.rollover.retry.listener.RetryListenerProvider;
 import com.netflix.conductor.metrics.Monitors;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +46,7 @@ import org.apache.http.nio.entity.NByteArrayEntity;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.util.EntityUtils;
 import org.elasticsearch.action.DocWriteResponse;
+import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
@@ -113,7 +114,7 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(ElasticSearchRestDAOV5.class);
 
-    private static final int RETRY_COUNT = 5;
+    private final int RETRY_COUNT;
 
     public static final String WORKFLOW_DOC_TYPE = "workflow";
     public static final String TASK_DOC_TYPE = "task";
@@ -123,8 +124,6 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
 
     private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyyMMWW");
-    //TODO: Remove after testing
-    private static final SimpleDateFormat CONDUCTOR_INDEX_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
 
     public @interface HttpMethod {
         String GET = "GET";
@@ -135,7 +134,7 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
 
     private static final String className = ElasticSearchRestDAOV5.class.getSimpleName();
 
-    private String indexName;
+    private final String indexName;
     private final String logIndexPrefix;
     private final String indexAliasName;
     private final String clusterHealthColor;
@@ -167,7 +166,7 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
         this.objectMapper = objectMapper;
         this.elasticSearchAdminClient = lowLevelRestClient;
         this.elasticSearchClient = new RestHighLevelClient(lowLevelRestClient);
-        this.indexName = config.getIndexName();
+        this.indexName = config.isRolloverIndexingEnabled() ? config.getRolloverIndexAliasName() : config.getIndexName();
         this.logIndexPrefix = config.getTasklogIndexName();
         this.indexAliasName = config.getIndexName();
         this.clusterHealthColor = config.getClusterHealthColor();
@@ -178,6 +177,7 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
         this.config = config;
         this.indexManager = indexManager;
         this.retryListenerProvider = retryListenerProvider;
+        this.RETRY_COUNT = config.getIndexRetryCount();
 
         // Set up a workerpool for performing async operations for workflow and task
         int corePoolSize = 6;
@@ -245,16 +245,18 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
         } catch (Exception e) {
             logger.error("Error creating index templates", e);
         }
-        String formattedIndexName = indexName + "_" + CONDUCTOR_INDEX_DATE_FORMAT.format(new Date()) + "-1";
+        String formattedIndexName = indexManager.getIndexNameProvider().getIndexNameToCreate();
 
         //FIXME: Remove this logic and move it to index manager
-        if (!indexManager.getCurrentAliasIndexName().isPresent()) {
+        if (!config.isRolloverIndexingEnabled() || !indexManager.isAliasIndexExists()) {
             //1. Create the required index
             try {
-                addIndex(formattedIndexName, indexAliasName);
+                addIndex(formattedIndexName, config.isRolloverIndexingEnabled()?indexAliasName: null);
             } catch (IOException e) {
-                logger.error("Failed to initialize index '{}'", indexName, e);
+                logger.error("Failed to initialize index '{}'", formattedIndexName, e);
             }
+
+            indexManager.updateIndex();
 
             //2. Add mappings for the workflow document type
             try {
@@ -658,15 +660,23 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
         try {
             Predicate<DeleteResponse> retryCondition = deleteResponse -> deleteResponse == null || deleteResponse.getResult() == DocWriteResponse.Result.NOT_FOUND;
 
-            IndexRequestWrapper<DeleteRequest, DeleteResponse> indexRequestWrapper = new IndexRequestWrapper<>(request, deleteRequest -> {
-                try {
-                    return elasticSearchClient.delete(deleteRequest);
-                } catch (IOException e) {
-                    throw new RuntimeException();
-                }
-            }, null);
+            IndexRequestWrapper<DeleteRequest, DeleteResponse> indexRequestWrapper = new IndexRequestWrapper<>(
+                    request,
+                    deleteRequest -> {
+                        try {
+                            return elasticSearchClient.delete(deleteRequest);
+                        } catch (IOException e) {
+                            throw new RuntimeException();
+                        }
+                    },
+                    null);
 
-            DeleteResponse response = new RetryUtil<DeleteResponse>().retryOnException(indexRequestWrapper, null, retryCondition::test, RETRY_COUNT, "Getting workflow document: " + workflowId, "getWorkflow",
+            DeleteResponse response = new RetryUtil<DeleteResponse>().retryOnException(
+                    indexRequestWrapper,
+                    null,
+                    retryCondition::test,
+                    RETRY_COUNT,
+                    "Deleting workflow document: " + workflowId, "getWorkflow",
                     retryListenerProvider.getDeleteRequestRetryListener(indexRequestWrapper));
 
             if (response == null || response.getResult() == DocWriteResponse.Result.NOT_FOUND) {
@@ -738,15 +748,15 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
                 .collect(Collectors.toMap(i -> keys[i], i -> values[i]));
         request.doc(source);
 
-        IndexRequestWrapper<UpdateRequest, UpdateResponse> wrapper = new IndexRequestWrapper<>(request, updateRequest -> {
+        IndexRequestWrapper<UpdateRequest, UpdateResponse> wrapper = new IndexRequestWrapper<>(
+                request,
+                updateRequest -> {
             try {
                 return elasticSearchClient.update(updateRequest);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }, workflow.getCreateTime());
-
-//        RetryListener listener = new RolloverUpdateListener(wrapper, indexManager.getIndexNameProvider());
 
         logger.debug("Updating workflow {} with {}", workflow.getWorkflowId(), source);
 
@@ -778,7 +788,12 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
             }
         }, null);
 
-        GetResponse response = new RetryUtil<GetResponse>().retryOnException(indexRequestWrapper, null, retryCondition::test, RETRY_COUNT, "Getting workflow document: " + workflowInstanceId, "getWorkflow",
+        GetResponse response = new RetryUtil<GetResponse>().retryOnException(
+                indexRequestWrapper,
+                null,
+                retryCondition::test,
+                RETRY_COUNT,
+                "Getting workflow document: " + workflowInstanceId, "getWorkflow",
                 retryListenerProvider.getLookUpRequestRetryListener(indexRequestWrapper));
 
         if (response.isExists()) {
@@ -870,7 +885,8 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
 
         SearchResult<String> workflowIds;
         try {
-            workflowIds = searchObjectIds(indexManager.getIndexNameProvider().getSearchRequestIndexName(), q, 0, 1000, null, WORKFLOW_DOC_TYPE);
+            String searchIndexName = indexManager.getIndexNameProvider().getSearchRequestIndexName();
+            workflowIds = searchObjectIds(searchIndexName, q, 0, 1000, null, WORKFLOW_DOC_TYPE);
         } catch (IOException e) {
             logger.error("Unable to communicate with ES to find archivable workflows", e);
             return Collections.emptyList();
@@ -890,7 +906,8 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
 
         SearchResult<String> workflowIds;
         try {
-            workflowIds = searchObjectIds(indexName, q, 0, 5000, Collections.singletonList("updateTime:ASC"), WORKFLOW_DOC_TYPE);
+            String searchIndexName = indexManager.getIndexNameProvider().getSearchRequestIndexName();
+            workflowIds = searchObjectIds(searchIndexName, q, 0, 5000, Collections.singletonList("updateTime:ASC"), WORKFLOW_DOC_TYPE);
         } catch (IOException e) {
             logger.error("Unable to communicate with ES to find recent running workflows", e);
             return Collections.emptyList();
@@ -913,7 +930,7 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
         request.source(docBytes, XContentType.JSON);
 
         if (bulkRequests.get(docType) == null) {
-            bulkRequests.put(docType, new BulkRequests(System.currentTimeMillis(), new BulkRequestWrapper(new BulkRequest())));
+            bulkRequests.put(docType, new BulkRequests<>(System.currentTimeMillis(), new BulkRequestWrapper(new BulkRequest())));
         }
 
         bulkRequests.get(docType).getBulkRequest().add(request);
@@ -938,7 +955,7 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
             bulkUpdateRequests.put(docType, new BulkRequests<>(System.currentTimeMillis(), new BulkUpdateRequestsWrapper()));
         }
 
-        bulkUpdateRequests.get(docType).getBulkRequest().getUpdateRequests().add(new RequestWrapper(request, createdTime));
+        bulkUpdateRequests.get(docType).getBulkRequest().getUpdateRequests().add(new RequestWrapper<>(request, createdTime));
         if (bulkUpdateRequests.get(docType).getBulkRequest().numberOfActions() >= this.indexBatchSize) {
             updateBulkRequest(docType);
         }
@@ -975,9 +992,10 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
      * @param operationDescription The type of operation that we are performing.
      */
     private void indexWithRetry(final BulkRequest request, final String operationDescription, String docType) {
+        BulkResponse response = null;
         try {
             long startTime = Instant.now().toEpochMilli();
-            new RetryUtil<BulkResponse>().retryOnException(() -> {
+            response = new RetryUtil<BulkResponse>().retryOnException(() -> {
                 try {
                     return elasticSearchClient.bulk(request);
                 } catch (IOException e) {
@@ -993,6 +1011,14 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
         } catch (Exception e) {
             Monitors.error(className, "index");
             logger.error("Failed to index {} for request type: {}", request.toString(), docType, e);
+            //TODO: Remove after debugging
+            if (response != null) {
+                String failedTasks = Arrays.stream(response.getItems())
+                        .filter(BulkItemResponse::isFailed)
+                        .map(BulkItemResponse::getId)
+                        .collect(Collectors.joining(","));
+                logger.error("Failed to index {} for ids : {}", docType, failedTasks);
+            }
         }
     }
 
@@ -1004,26 +1030,41 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
      * @param operationDescription The type of operation that we are performing.
      */
     private void updateWithRetry(final BulkUpdateRequestsWrapper request, final String operationDescription, String docType) {
+        BulkResponse response = null;
         try {
-            Predicate<BulkResponse> resultRetryPredicate = input -> Arrays.stream(input.getItems()).anyMatch(response -> response.isFailed());
-
             long startTime = Instant.now().toEpochMilli();
-            new RetryUtil<BulkResponse>().retryOnException(() -> {
-                try {
-                    return elasticSearchClient.bulk(request.constructBulkRequest());
-                } catch (IOException e) {
-                    logger.error("Bulk update failed for docType " + docType, e);
-                    throw new RuntimeException(e);
-                }
-            }, null, resultRetryPredicate::test, RETRY_COUNT, operationDescription, "indexWithRetry", retryListenerProvider.getBulkUpdateRequestRetryListeners(request));
+            response = new RetryUtil<BulkResponse>().retryOnException(
+                    () -> {
+                        try {
+                            return elasticSearchClient.bulk(request.constructBulkRequest());
+                        } catch (IOException e) {
+                            logger.error("Bulk update failed for docType " + docType, e);
+                            throw new RuntimeException(e);
+                        }
+                    },
+                    null,
+                    BulkResponse::hasFailures,
+                    RETRY_COUNT,
+                    operationDescription,
+                    "updateWithRetry",
+                    retryListenerProvider.getBulkUpdateRequestRetryListeners(request));
+
             long endTime = Instant.now().toEpochMilli();
             logger.debug("Time taken {} for bulk updating object of type: {}", endTime - startTime, docType);
             Monitors.recordESIndexTime("update_object", docType, endTime - startTime);
             Monitors.recordWorkerQueueSize("indexQueue", ((ThreadPoolExecutor) executorService).getQueue().size());
             Monitors.recordWorkerQueueSize("logQueue", ((ThreadPoolExecutor) logExecutorService).getQueue().size());
         } catch (Exception e) {
-            Monitors.error(className, "index");
-            logger.error("Failed to index {} for request type: {}", request.toString(), docType, e);
+            Monitors.error(className, "updateObject");
+            logger.error("Failed to update {} for request type: {}", request.toString(), docType, e);
+            //TODO: Remove after debugging
+            if (response != null) {
+                String failedTasks = Arrays.stream(response.getItems())
+                        .filter(BulkItemResponse::isFailed)
+                        .map(BulkItemResponse::getId)
+                        .collect(Collectors.joining(","));
+                logger.error("Failed to index {} for ids : {}", docType, failedTasks);
+            }
         }
     }
 
@@ -1130,23 +1171,5 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
                     logger.debug("Flushing bulk request buffer for type {}, size: {}", entry.getKey(), entry.getValue().getBulkRequest().numberOfActions());
                     updateBulkRequest(entry.getKey());
                 });
-    }
-
-    private static class BulkRequests<K> {
-        private final long lastFlushTime;
-        private final K bulkRequestWrapper;
-
-        long getLastFlushTime() {
-            return lastFlushTime;
-        }
-
-        K getBulkRequest() {
-            return bulkRequestWrapper;
-        }
-
-        BulkRequests(long lastFlushTime, K bulkRequestWrapper) {
-            this.lastFlushTime = lastFlushTime;
-            this.bulkRequestWrapper = bulkRequestWrapper;
-        }
     }
 }

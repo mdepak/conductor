@@ -453,7 +453,6 @@ public class WorkflowExecutor {
             .forEach(task -> {
                 if (queueDAO.resetOffsetTime(QueueUtils.getQueueName(task), task.getTaskId())) {
                     task.setCallbackAfterSeconds(0);
-                    //FIXME: Since task index might already be created, update here.
                     executionDAOFacade.updateTask(task);
                 }
             });

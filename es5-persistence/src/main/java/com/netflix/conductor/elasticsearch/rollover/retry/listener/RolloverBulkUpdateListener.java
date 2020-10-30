@@ -1,11 +1,11 @@
-package com.netflix.conductor.elasticsearch.rollover.listener;
+package com.netflix.conductor.elasticsearch.rollover.retry.listener;
 
 import com.github.rholder.retry.Attempt;
 import com.github.rholder.retry.RetryListener;
 import com.netflix.conductor.dao.es5.index.BulkUpdateRequestsWrapper;
 import com.netflix.conductor.elasticsearch.rollover.IndexNameProvider;
 import com.netflix.conductor.elasticsearch.rollover.RequestWrapper;
-import org.elasticsearch.action.bulk.BulkItemResponse;
+import com.netflix.conductor.elasticsearch.rollover.retry.validator.DocumentMissingValidator;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -22,10 +22,16 @@ public class RolloverBulkUpdateListener implements RetryListener {
 
     private final BulkUpdateRequestsWrapper updateRequest;
     private final IndexNameProvider indexNameProvider;
+    private final DocumentMissingValidator documentMissingValidator;
 
-    public RolloverBulkUpdateListener(BulkUpdateRequestsWrapper updateRequest, IndexNameProvider indexNameProvider) {
+    /*Use this counter to indicate the retry count;
+     Sometimes timeout exception happens and increasing the attempt count might lead to skipping the right index to update*/
+    private int attemptCount = 0;
+
+    public RolloverBulkUpdateListener(BulkUpdateRequestsWrapper updateRequest, IndexNameProvider indexNameProvider, DocumentMissingValidator documentMissingValidator) {
         this.updateRequest = updateRequest;
         this.indexNameProvider = indexNameProvider;
+        this.documentMissingValidator = documentMissingValidator;
     }
 
     @Override
@@ -35,6 +41,10 @@ public class RolloverBulkUpdateListener implements RetryListener {
             List<RequestWrapper<UpdateRequest>> newRequests = Collections.synchronizedList(new ArrayList<>());
 
             if (attempt.hasResult()) {
+
+                //Increase the attempt only when the bulk response is returned
+                attemptCount++;
+
                 BulkResponse bulkResponse = (BulkResponse) attempt.getResult();
 
                 if (bulkResponse.getItems().length != updateRequest.getUpdateRequests().size()) {
@@ -42,15 +52,15 @@ public class RolloverBulkUpdateListener implements RetryListener {
                 }
 
                 for (int idx = 0; idx < updateRequest.getUpdateRequests().size(); idx++) {
-                    BulkItemResponse.Failure requestFailure = bulkResponse.getItems()[idx].getFailure();
-                    if (requestFailure != null) {
+
+                    if (bulkResponse.getItems()[idx].isFailed()) {
                         RequestWrapper<UpdateRequest> requestWrapper = updateRequest.getUpdateRequests().get(idx);
 
-                        if (requestFailure.getMessage().contains("document_missing_exception")) {
+                        if (documentMissingValidator.getBulkUpdateDocumentMissingValidator().test(bulkResponse.getItems()[idx])) {
                             UpdateRequest oldUpdateRequest = requestWrapper.getRequest();
-                            String newIndexName = indexNameProvider.getWriteIndexName((int) attempt.getAttemptNumber(), requestWrapper.getCreatedTime());
+                            String newIndexName = indexNameProvider.getWriteIndexName(attemptCount, requestWrapper.getCreatedTime());
                             if (newIndexName != null) {
-                                newRequests.add(new RequestWrapper(copyUpdateRequest(oldUpdateRequest, newIndexName), requestWrapper.getCreatedTime()));
+                                newRequests.add(new RequestWrapper<>(copyUpdateRequest(oldUpdateRequest, newIndexName), requestWrapper.getCreatedTime()));
                             } else {
                                 logger.warn("Failed to update document of type {} with id {}", oldUpdateRequest.type(), oldUpdateRequest.id());
                             }
