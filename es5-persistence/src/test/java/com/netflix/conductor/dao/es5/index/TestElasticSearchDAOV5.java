@@ -35,7 +35,6 @@ import com.netflix.conductor.elasticsearch.SystemPropertiesElasticSearchConfigur
 import com.netflix.conductor.elasticsearch.es5.EmbeddedElasticSearchV5;
 import com.netflix.conductor.elasticsearch.query.parser.ParserException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
@@ -48,6 +47,10 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+
+import com.netflix.conductor.elasticsearch.rollover.DefaultIndexNameProvider;
+import com.netflix.conductor.elasticsearch.rollover.IndexManager;
+import com.netflix.conductor.elasticsearch.rollover.retry.listener.DefaultRetryListenerProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
@@ -69,6 +72,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class TestElasticSearchDAOV5 {
 	private static final String MSG_DOC_TYPE = "message";
@@ -108,7 +112,10 @@ public class TestElasticSearchDAOV5 {
 				.get();
 
 		ObjectMapper objectMapper = new JsonMapperProvider().get();
-		indexDAO = new ElasticSearchDAOV5(elasticSearchClient, configuration, objectMapper);
+
+		IndexManager mockIndexManager = Mockito.mock(IndexManager.class);
+		Mockito.when(mockIndexManager.getIndexNameProvider()).thenReturn(new DefaultIndexNameProvider(configuration));
+		indexDAO = new ElasticSearchDAOV5(elasticSearchClient, configuration, objectMapper, mockIndexManager, new DefaultRetryListenerProvider());
 	}
 
 	@AfterClass
@@ -245,7 +252,7 @@ public class TestElasticSearchDAOV5 {
 		String[] keyChanges = {"workflowType"};
 		String[] valueChanges = {newWorkflowType};
 
-		indexDAO.updateWorkflow(testId, keyChanges, valueChanges);
+		indexDAO.updateWorkflow(workflow, keyChanges, valueChanges);
 
 		await()
 				.atMost(3, TimeUnit.SECONDS)
@@ -366,7 +373,7 @@ public class TestElasticSearchDAOV5 {
 		task.setTaskDefName("some-task-def-name");
 		task.setReasonForIncompletion("some-failure-reason");
 
-		indexDAO.indexTask(task);
+		indexDAO.updateTask(task);
 
 		await()
 				.atMost(5, TimeUnit.SECONDS)
@@ -395,8 +402,8 @@ public class TestElasticSearchDAOV5 {
 		task.setTaskDefName("some-task-def-name");
 		task.setReasonForIncompletion("some-failure-reason");
 
-		indexDAO.indexTask(task);
-		indexDAO.indexTask(task);
+		indexDAO.updateTask(task);
+		indexDAO.updateTask(task);
 
 		await()
 				.atMost(5, TimeUnit.SECONDS)
@@ -435,7 +442,9 @@ public class TestElasticSearchDAOV5 {
 				.get();
 
 		ObjectMapper objectMapper = new JsonMapperProvider().get();
-		indexDAO = new ElasticSearchDAOV5(elasticSearchClient, configuration, objectMapper);
+		IndexManager mockIndexManager = Mockito.mock(IndexManager.class);
+		Mockito.when(mockIndexManager.getIndexNameProvider()).thenReturn(new DefaultIndexNameProvider(configuration));
+		indexDAO = new ElasticSearchDAOV5(elasticSearchClient, configuration, objectMapper, mockIndexManager, new DefaultRetryListenerProvider());
 	}
 
 	@Test

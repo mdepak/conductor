@@ -18,6 +18,19 @@ import com.netflix.conductor.dao.es5.index.ElasticSearchDAOV5;
 import com.netflix.conductor.dao.es5.index.ElasticSearchRestDAOV5;
 import com.netflix.conductor.elasticsearch.ElasticSearchConfiguration;
 import com.netflix.conductor.elasticsearch.EmbeddedElasticSearchProvider;
+import com.netflix.conductor.elasticsearch.rollover.DefaultIndexNameProvider;
+import com.netflix.conductor.elasticsearch.rollover.IndexManager;
+import com.netflix.conductor.elasticsearch.rollover.IndexManagerDAOV5;
+import com.netflix.conductor.elasticsearch.rollover.IndexManagerRestDAOV5;
+import com.netflix.conductor.elasticsearch.rollover.IndexNameProvider;
+import com.netflix.conductor.elasticsearch.rollover.RolloverIndexProvider;
+import com.netflix.conductor.elasticsearch.rollover.retry.listener.DefaultRetryListenerProvider;
+import com.netflix.conductor.elasticsearch.rollover.retry.listener.RetryListenerProvider;
+import com.netflix.conductor.elasticsearch.rollover.retry.listener.RollOverRetryListenerProvider;
+import com.netflix.conductor.elasticsearch.rollover.retry.validator.DocumentMissingValidator;
+import com.netflix.conductor.elasticsearch.rollover.retry.validator.DocumentMissingValidatorDAOV5;
+import com.netflix.conductor.elasticsearch.rollover.retry.validator.DocumentMissingValidatorRestDAOV5;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,7 +41,8 @@ import java.util.Set;
  */
 public class ElasticSearchV5Module extends AbstractModule {
 
-    private boolean restTransport;
+    private final boolean restTransport;
+    private final boolean isRolloverIndexingEnabled;
 
     public ElasticSearchV5Module(ElasticSearchConfiguration elasticSearchConfiguration) {
 
@@ -39,14 +53,29 @@ public class ElasticSearchV5Module extends AbstractModule {
         String esTransport = elasticSearchConfiguration.getURIs().get(0).getScheme();
 
         this.restTransport = REST_SCHEMAS.contains(esTransport);
+        this.isRolloverIndexingEnabled = elasticSearchConfiguration.isRolloverIndexingEnabled();
     }
 
     @Override
     protected void configure() {
+        if (isRolloverIndexingEnabled) {
+            if (restTransport) {
+                bind(DocumentMissingValidator.class).to(DocumentMissingValidatorRestDAOV5.class);
+            } else {
+                bind(DocumentMissingValidator.class).to(DocumentMissingValidatorDAOV5.class);
+            }
+            bind(IndexNameProvider.class).to(RolloverIndexProvider.class).asEagerSingleton();
+            bind(RetryListenerProvider.class).to(RollOverRetryListenerProvider.class).asEagerSingleton();
+        } else {
+            bind(IndexNameProvider.class).to(DefaultIndexNameProvider.class).asEagerSingleton();
+            bind(RetryListenerProvider.class).to(DefaultRetryListenerProvider.class).asEagerSingleton();
+        }
 
         if (restTransport) {
+            bind(IndexManager.class).to(IndexManagerRestDAOV5.class).asEagerSingleton();
             bind(IndexDAO.class).to(ElasticSearchRestDAOV5.class);
         } else {
+            bind(IndexManager.class).to(IndexManagerDAOV5.class).asEagerSingleton();
             bind(IndexDAO.class).to(ElasticSearchDAOV5.class);
         }
 

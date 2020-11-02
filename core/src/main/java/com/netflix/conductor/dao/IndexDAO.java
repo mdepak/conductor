@@ -54,14 +54,33 @@ public interface IndexDAO {
     /**
      * @param task Task to be indexed
      */
-    void indexTask(Task task);
+    void updateTask(Task task);
+
+    //TODO: Remove the default implementation after V6 is also implemented
+    /**
+     * Create the task index
+     * @param task task to be updated
+     */
+    default void createTask(Task task){
+
+    }
+
+    //TODO: Remove the default implementation after V6 is also implemented
+    /**
+     *
+     * @param task Task to be indexed asynchronously
+     * @return CompletableFuture of type void
+     */
+    default CompletableFuture<Void> asyncCreateTask(Task task){
+        return null;
+    }
 
     /**
      *
      * @param task Task to be indexed asynchronously
      * @return CompletableFuture of type void
      */
-    CompletableFuture<Void> asyncIndexTask(Task task);
+    CompletableFuture<Void> asyncUpdateTask(Task task);
 
     /**
      *
@@ -98,23 +117,43 @@ public interface IndexDAO {
      */
     CompletableFuture<Void> asyncRemoveWorkflow(String workflowId);
 
+    //TODO: Remove the default implementation after V6 is also implemented
+
+    /**
+     * Update the workflow index
+     * @param workflow workflow to be updated
+     */
+    default void updateWorkflow(Workflow workflow){
+
+    }
+
+    //TODO: Remove the default implementation after V6 is also implemented
+    /**
+     * Update the workflow index async
+     * @param workflow workflow to be updated
+     * @return CompletableFuture of type void
+     */
+    default CompletableFuture<Void> asyncUpdateWorkflow(Workflow workflow){
+        return null;
+    }
+
     /**
      *
-     * Updates the index
-     * @param workflowInstanceId id of the workflow
+     * Updates the specific field of the workflow
+     * @param workflow workflow to be updated
      * @param keys keys to be updated
      * @param values values. Number of keys and values MUST match.
      */
-    void updateWorkflow(String workflowInstanceId, String[] keys, Object[] values);
+    void updateWorkflow(Workflow workflow, String[] keys, Object[] values);
 
     /**
-     * Updates the index
-     * @param workflowInstanceId id of the workflow
+     * Updates the specific field of the workflow
+     * @param workflow workflow to be updated
      * @param keys keys to be updated
      * @param values values. Number of keys and values MUST match.
      * @return CompletableFuture of type void
      */
-    CompletableFuture<Void> asyncUpdateWorkflow(String workflowInstanceId, String[] keys, Object[] values);
+    CompletableFuture<Void> asyncUpdateWorkflow(Workflow workflow, String[] keys, Object[] values);
 
     /**
      * Retrieves a specific field from the index

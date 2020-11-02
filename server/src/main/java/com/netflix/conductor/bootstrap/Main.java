@@ -47,8 +47,6 @@ public class Main {
         Optional<EmbeddedElasticSearch> embeddedElasticSearch = serverInjector.getInstance(EmbeddedElasticSearchProvider.class).get();
         embeddedElasticSearch.ifPresent(BootstrapUtil::startEmbeddedElasticsearchServer);
 
-        BootstrapUtil.setupIndex(serverInjector.getInstance(IndexDAO.class));
-
         try {
             serverInjector.getInstance(IndexDAO.class).setup();
         } catch (Exception e) {

@@ -28,10 +28,15 @@ import com.google.common.base.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
+import javax.validation.constraints.Null;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 
@@ -92,9 +97,11 @@ public class RetryUtil<T> {
                               Predicate<Throwable> throwablePredicate,
                               Predicate<T> resultRetryPredicate,
                               int retryCount,
-                              String shortDescription, String operationName) throws RuntimeException {
+                              String shortDescription, String operationName,
+                              List<RetryListener> listeners,
+                              @Nullable Consumer<T> failureMessageDebugger) throws RuntimeException {
 
-        Retryer<T> retryer = RetryerBuilder.<T>newBuilder()
+        RetryerBuilder builder = RetryerBuilder.<T>newBuilder()
                 .retryIfException(Optional.ofNullable(throwablePredicate).orElse(exception -> true))
                 .retryIfResult(Optional.ofNullable(resultRetryPredicate).orElse(result -> false))
                 .withWaitStrategy(WaitStrategies.join(
@@ -110,8 +117,14 @@ public class RetryUtil<T> {
                                 attempt.getAttemptNumber(), attempt.getDelaySinceFirstAttempt(), operationName, shortDescription);
                         internalNumberOfRetries.incrementAndGet();
                     }
-                })
-                .build();
+                });
+
+        for(RetryListener listener : listeners)
+        {
+            builder.withRetryListener(listener);
+        }
+
+        Retryer<T> retryer =builder.build();
 
         try {
             return retryer.call(supplierCommand::get);
@@ -122,9 +135,38 @@ public class RetryUtil<T> {
             throw new RuntimeException(errorMessage, executionException.getCause());
         } catch (RetryException retryException) {
             String errorMessage = format("Operation '%s:%s' failed after retrying %d times, retry limit %d", operationName,
-                    shortDescription, internalNumberOfRetries.get(), 3);
-            logger.error(errorMessage, retryException.getLastFailedAttempt().getExceptionCause());
-            throw new RuntimeException(errorMessage, retryException.getLastFailedAttempt().getExceptionCause());
+                    shortDescription, internalNumberOfRetries.get(), retryCount);
+
+            if (failureMessageDebugger != null && retryException.getLastFailedAttempt().hasResult()) {
+                failureMessageDebugger.accept((T) retryException.getLastFailedAttempt().getResult());
+            }
+
+            if (retryException.getLastFailedAttempt().hasException()) {
+                logger.error(errorMessage, retryException.getLastFailedAttempt().getExceptionCause());
+                throw new RuntimeException(errorMessage, retryException.getLastFailedAttempt().getExceptionCause());
+            } else {
+                //When retry condition is not met, exception will not present
+                throw new RuntimeException(errorMessage + " with unsuccessful retryPredicate");
+            }
         }
+    }
+
+    @SuppressWarnings("Guava")
+    public T retryOnException(Supplier<T> supplierCommand,
+                              Predicate<Throwable> throwablePredicate,
+                              Predicate<T> resultRetryPredicate,
+                              int retryCount,
+                              String shortDescription, String operationName) throws RuntimeException{
+        return this.retryOnException(supplierCommand, throwablePredicate, resultRetryPredicate, retryCount, shortDescription, operationName, Collections.emptyList(), null);
+    }
+
+    public T retryOnException(Supplier<T> supplierCommand,
+                              Predicate<Throwable> throwablePredicate,
+                              Predicate<T> resultRetryPredicate,
+                              int retryCount,
+                              String shortDescription,
+                              String operationName,
+                              List<RetryListener> listeners) throws RuntimeException{
+        return this.retryOnException(supplierCommand, throwablePredicate, resultRetryPredicate, retryCount, shortDescription, operationName, listeners, null);
     }
 }

@@ -236,7 +236,7 @@ public class TestElasticSearchDAOV6 {
 
         indexDAO.indexWorkflow(workflow);
 
-        indexDAO.updateWorkflow(workflow.getWorkflowId(), new String[]{"status"}, new Object[]{Workflow.WorkflowStatus.COMPLETED});
+        indexDAO.updateWorkflow(workflow, new String[]{"status"}, new Object[]{Workflow.WorkflowStatus.COMPLETED});
 
         summary.setStatus(Workflow.WorkflowStatus.COMPLETED);
         assertWorkflowSummary(workflow.getWorkflowId(), summary);
@@ -249,7 +249,7 @@ public class TestElasticSearchDAOV6 {
 
         indexDAO.indexWorkflow(workflow);
 
-        indexDAO.asyncUpdateWorkflow(workflow.getWorkflowId(), new String[]{"status"}, new Object[]{Workflow.WorkflowStatus.FAILED}).get();
+        indexDAO.asyncUpdateWorkflow(workflow, new String[]{"status"}, new Object[]{Workflow.WorkflowStatus.FAILED}).get();
 
         summary.setStatus(Workflow.WorkflowStatus.FAILED);
         assertWorkflowSummary(workflow.getWorkflowId(), summary);
@@ -262,7 +262,7 @@ public class TestElasticSearchDAOV6 {
 
         TaskSummary summary = new TaskSummary(task);
 
-        indexDAO.indexTask(task);
+        indexDAO.updateTask(task);
 
         List<String> tasks = tryFindResults(() -> searchTasks(workflow));
 
@@ -285,8 +285,8 @@ public class TestElasticSearchDAOV6 {
         task.setTaskDefName("some-task-def-name");
         task.setReasonForIncompletion("some-failure-reason");
 
-        indexDAO.indexTask(task);
-        indexDAO.indexTask(task);
+        indexDAO.updateTask(task);
+        indexDAO.updateTask(task);
 
         await()
                 .atMost(5, TimeUnit.SECONDS)
@@ -335,7 +335,7 @@ public class TestElasticSearchDAOV6 {
 
         TaskSummary summary = new TaskSummary(task);
 
-        indexDAO.asyncIndexTask(task).get();
+        indexDAO.asyncUpdateTask(task).get();
 
         List<String> tasks = tryFindResults(() -> searchTasks(workflow));
 
