@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Thread safe wrapper for the bulk update requests
+ */
 public class BulkUpdateRequestsWrapper {
     private List<RequestWrapper<UpdateRequest>> updateRequests;
 

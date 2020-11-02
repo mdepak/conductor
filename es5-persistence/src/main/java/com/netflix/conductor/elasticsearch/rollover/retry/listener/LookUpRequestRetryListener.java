@@ -26,22 +26,25 @@ public class LookUpRequestRetryListener implements RetryListener {
 
     private final IndexRequestWrapper<GetRequest, GetResponse> indexRequestWrapper;
     private final IndexNameProvider indexNameProvider;
+    private int retryAttempt = 0;
 
     public LookUpRequestRetryListener(IndexRequestWrapper<GetRequest, GetResponse> updateRequest, IndexNameProvider indexNameProvider) {
         this.indexRequestWrapper = updateRequest;
         this.indexNameProvider = indexNameProvider;
+
     }
 
     @Override
     public <V> void onRetry(Attempt<V> attempt) {
         try {
             if (attempt.hasException() || (attempt.hasResult())) {
-                GetResponse response  = (GetResponse) attempt.getResult();
+                GetResponse response = (GetResponse) attempt.getResult();
 
-                if(!response.isExists())
-                {
+                if (!response.isExists()) {
+                    retryAttempt++;
                     String oldIndexName = indexRequestWrapper.getRequest().index();
-                    String newIndexName = indexNameProvider.getLookupRequestIndexName((int) attempt.getAttemptNumber());
+                    String newIndexName = indexNameProvider.getLookupRequestIndexName((retryAttempt));
+                    //TODO: Handle failure
                     if (newIndexName == null) {
                         newIndexName = "conductor";
                     }

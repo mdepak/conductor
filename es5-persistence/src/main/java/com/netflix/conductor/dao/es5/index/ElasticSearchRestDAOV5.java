@@ -103,7 +103,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -130,6 +129,7 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
         String POST = "POST";
         String PUT = "PUT";
         String HEAD = "HEAD";
+        String DELETE = "DELETE";
     }
 
     private static final String className = ElasticSearchRestDAOV5.class.getSimpleName();
@@ -436,6 +436,8 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
             WorkflowSummary summary = new WorkflowSummary(workflow);
             byte[] docBytes = objectMapper.writeValueAsBytes(summary);
 
+            logger.info("Creating workflow index for id: {}", workflow.getWorkflowId());
+
             IndexRequest request = new IndexRequest(indexName, WORKFLOW_DOC_TYPE, workflowId);
             request.source(docBytes, XContentType.JSON);
             new RetryUtil<IndexResponse>().retryOnException(() -> {
@@ -467,6 +469,8 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
             long startTime = Instant.now().toEpochMilli();
             String taskId = task.getTaskId();
             TaskSummary summary = new TaskSummary(task);
+            logger.info("Updating index for task with id : {}", taskId);
+
 
             updateObject(indexName, TASK_DOC_TYPE, taskId, summary, task.getScheduledTime());
             long endTime = Instant.now().toEpochMilli();
@@ -585,7 +589,7 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
             long startTime = Instant.now().toEpochMilli();
             String taskId = task.getTaskId();
             TaskSummary summary = new TaskSummary(task);
-
+            logger.info("Creating index for task with id : {}", taskId);
             indexObject(indexName, TASK_DOC_TYPE, taskId, summary);
             long endTime = Instant.now().toEpochMilli();
             logger.debug("Time taken {} for creating task index:{} in workflow: {}", endTime - startTime, taskId, task.getWorkflowInstanceId());
@@ -658,7 +662,8 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
         DeleteRequest request = new DeleteRequest(indexName, WORKFLOW_DOC_TYPE, workflowId);
 
         try {
-            Predicate<DeleteResponse> retryCondition = deleteResponse -> deleteResponse == null || deleteResponse.getResult() == DocWriteResponse.Result.NOT_FOUND;
+            Predicate<DeleteResponse> retryCondition = deleteResponse -> deleteResponse == null
+                    || deleteResponse.getResult() == DocWriteResponse.Result.NOT_FOUND;
 
             IndexRequestWrapper<DeleteRequest, DeleteResponse> indexRequestWrapper = new IndexRequestWrapper<>(
                     request,
@@ -676,7 +681,7 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
                     null,
                     retryCondition::test,
                     RETRY_COUNT,
-                    "Deleting workflow document: " + workflowId, "getWorkflow",
+                    "Deleting workflow document: " + workflowId, "deleteWorkflow",
                     retryListenerProvider.getDeleteRequestRetryListener(indexRequestWrapper));
 
             if (response == null || response.getResult() == DocWriteResponse.Result.NOT_FOUND) {
@@ -706,21 +711,26 @@ public class ElasticSearchRestDAOV5 implements IndexDAO {
             byte[] docBytes = objectMapper.writeValueAsBytes(summary);
 
             request.doc(docBytes, XContentType.JSON);
-
+            logger.info("Updating workflow index for id : {}", workflow.getWorkflowId());
             logger.debug("Updating workflow {} with {}", workflow.getWorkflowId(), docBytes);
 
-            IndexRequestWrapper<UpdateRequest, UpdateResponse> wrapper = new IndexRequestWrapper<>(request, updateRequest -> {
+            IndexRequestWrapper<UpdateRequest, UpdateResponse> updateRequest = new IndexRequestWrapper<>(request, updateReq -> {
                 try {
-                    return elasticSearchClient.update(updateRequest);
+                    return elasticSearchClient.update(updateReq);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }, workflow.getCreateTime());
 
-//            RetryListener listener = new RolloverUpdateListener(wrapper, indexManager.getIndexNameProvider());
-            Supplier updateRequest = wrapper;
+            new RetryUtil<UpdateResponse>().retryOnException(
+                    updateRequest,
+                    null,
+                    null,
+                    RETRY_COUNT,
+                    "Updating workflow document: " + workflow.getWorkflowId(),
+                    "updateWorkflow",
+                    retryListenerProvider.getUpdateRequestRetryListeners(updateRequest));
 
-            new RetryUtil<UpdateResponse>().retryOnException(updateRequest, null, null, RETRY_COUNT, "Updating workflow document: " + workflow.getWorkflowId(), "updateWorkflow", retryListenerProvider.getUpdateRequestRetryListeners(wrapper));
             long endTime = Instant.now().toEpochMilli();
             logger.debug("Time taken {} for updating workflow: {}", endTime - startTime, workflow.getWorkflowId());
             Monitors.recordESIndexTime("updateWorkflow", WORKFLOW_DOC_TYPE, endTime - startTime);

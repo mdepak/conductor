@@ -85,7 +85,16 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TimeZone;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -606,7 +615,9 @@ public class ElasticSearchDAOV5 implements IndexDAO {
 
     private void indexObject(UpdateRequest req, String docType) {
         if (bulkRequests.get(docType) == null) {
-            bulkRequests.put(docType, new BulkRequests<>(System.currentTimeMillis(), new BulkRequestBuilderWrapper(elasticSearchClient.prepareBulk())));
+            bulkRequests.put(docType, new BulkRequests<>(
+                    System.currentTimeMillis(),
+                    new BulkRequestBuilderWrapper(elasticSearchClient.prepareBulk())));
         }
         bulkRequests.get(docType).getBulkRequest().add(req);
         if (bulkRequests.get(docType).getBulkRequest().numberOfActions() >= this.indexBatchSize) {
@@ -627,7 +638,9 @@ public class ElasticSearchDAOV5 implements IndexDAO {
     private synchronized void indexBulkRequest(String docType) {
         if (bulkRequests.get(docType).getBulkRequest() != null && bulkRequests.get(docType).getBulkRequest().numberOfActions() > 0) {
             indexWithRetry(bulkRequests.get(docType).getBulkRequest(), docType);
-            bulkRequests.put(docType, new BulkRequests<>(System.currentTimeMillis(), new BulkRequestBuilderWrapper(elasticSearchClient.prepareBulk())));
+            bulkRequests.put(docType, new BulkRequests<>(
+                    System.currentTimeMillis(),
+                    new BulkRequestBuilderWrapper(elasticSearchClient.prepareBulk())));
         }
     }
 
@@ -1041,7 +1054,9 @@ public class ElasticSearchDAOV5 implements IndexDAO {
                 .filter(entry -> (System.currentTimeMillis() - entry.getValue().getLastFlushTime()) >= asyncBufferFlushTimeout * 1000)
                 .filter(entry -> entry.getValue().getBulkRequest() != null && entry.getValue().getBulkRequest().numberOfActions() > 0)
                 .forEach(entry -> {
-                    logger.debug("Flushing bulk request buffer for type {}, size: {}", entry.getKey(), entry.getValue().getBulkRequest().numberOfActions());
+                    logger.debug("Flushing bulk update request buffer for type {}, size: {}",
+                            entry.getKey(),
+                            entry.getValue().getBulkRequest().numberOfActions());
                     updateBulkRequest(entry.getKey());
                 });
     }

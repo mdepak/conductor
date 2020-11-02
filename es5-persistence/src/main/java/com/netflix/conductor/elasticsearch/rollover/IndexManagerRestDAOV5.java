@@ -20,8 +20,6 @@ import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.util.EntityUtils;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
-import org.elasticsearch.action.admin.indices.rollover.RolloverResponse;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.common.unit.SizeUnit;
@@ -54,8 +52,10 @@ public class IndexManagerRestDAOV5 implements IndexManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexManagerRestDAOV5.class);
 
     @Inject
-    IndexManagerRestDAOV5(RestClient lowLevelRestClient, ElasticSearchConfiguration config, ObjectMapper objectMapper, IndexNameProvider indexNameProvider)
-    {
+    IndexManagerRestDAOV5(RestClient lowLevelRestClient,
+                          ElasticSearchConfiguration config,
+                          ObjectMapper objectMapper,
+                          IndexNameProvider indexNameProvider) {
         this.config = config;
         this.objectMapper = objectMapper;
         this.indexNamePrefix = config.getIndexName();
@@ -63,15 +63,14 @@ public class IndexManagerRestDAOV5 implements IndexManager {
         this.elasticSearchAdminClient = lowLevelRestClient;
         this.indexNameProvider = indexNameProvider;
 
-
         this.indexNameProvider.updateIndices(getAllIndexes());
 
-        if(config.isRolloverIndexingEnabled()) {
+        if (config.isRolloverIndexingEnabled()) {
             //FIXME: Change update frequency
             Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(this::rollOverIndex, 30, 60, TimeUnit.SECONDS);
+            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(this::updateIndex,30,60, TimeUnit.SECONDS);
         }
     }
-
 
     public void rollOverIndex() {
         try {
@@ -100,55 +99,58 @@ public class IndexManagerRestDAOV5 implements IndexManager {
             ObjectNode mappings = objectMapper.createObjectNode();
 
 
-            InputStream stream =this.getClass().getResourceAsStream("/mappings_docType_workflow.json");
+            InputStream stream = this.getClass().getResourceAsStream("/mappings_docType_workflow.json");
             ObjectNode node = objectMapper.readValue(stream, ObjectNode.class);
             mappings.put(ElasticSearchRestDAOV5.WORKFLOW_DOC_TYPE, node.get(ElasticSearchRestDAOV5.WORKFLOW_DOC_TYPE));
 
             ObjectNode taskMappingNode = objectMapper.readValue(this.getClass().getResourceAsStream("/mappings_docType_task.json"), ObjectNode.class);
             mappings.put(ElasticSearchRestDAOV5.TASK_DOC_TYPE, taskMappingNode.get(ElasticSearchRestDAOV5.TASK_DOC_TYPE));
 
+            ObjectNode setting = objectMapper.createObjectNode();
+            ObjectNode indexSetting = objectMapper.createObjectNode();
+
+            indexSetting.put("number_of_shards", config.getElasticSearchIndexShardCount());
+            indexSetting.put("number_of_replicas", config.getElasticSearchIndexReplicationCount());
+            setting.set("index", indexSetting);
+
+            ObjectNode requestBody = objectMapper.createObjectNode();
+
+            requestBody.set("settings", setting);
             requestParams.set("mappings", mappings);
 
-            Response rolloverResponse = elasticSearchAdminClient.performRequest(ElasticSearchRestDAOV5.HttpMethod.POST, resourcePath, Collections.emptyMap(),
-                    new NStringEntity(requestParams.toString(), ContentType.APPLICATION_JSON));
+            Response rolloverResponse = elasticSearchAdminClient.performRequest(
+                    ElasticSearchRestDAOV5.HttpMethod.POST,
+                    resourcePath,
+                    Collections.emptyMap(),
+                    new NStringEntity(requestParams.toString(),ContentType.APPLICATION_JSON));
 
             if (rolloverResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                String responseBody = EntityUtils.toString(rolloverResponse.getEntity());
-                RolloverResponse rolloverResult = objectMapper.readValue(responseBody, RolloverResponse.class);
+                ObjectNode rolloverResult = objectMapper.readValue(EntityUtils.toString(rolloverResponse.getEntity()), ObjectNode.class);
+                String IS_INDEX_ROLLED_OVER = "rolled_over";
+                if (Boolean.parseBoolean(String.valueOf(rolloverResult.get(IS_INDEX_ROLLED_OVER)))) {
+                    LOGGER.info("Successfully rolled over to new index : {}", newIndexName);
 
-                this.indexNameProvider.updateIndices(getAllIndexes());
-                LOGGER.info("Index rolled over successful" + rolloverResult.getNewIndex());
-                // Add Mappings for the workflow document type
-                try {
-//                    addMappingToIndex(newIndexName, WORKFLOW_DOC_TYPE, "/mappings_docType_workflow.json");
-                } catch (Exception e) {
-                    LOGGER.error("Failed to add {} mapping", ElasticSearchRestDAOV5.WORKFLOW_DOC_TYPE);
+                    //Delete the older indices based on the config
+                    if (config.isOldRolloverIndexDeletionEnabled()) {
+                        deleteOldRolledOverIndex();
+                    }
                 }
 
-                //Add Mappings for task document type
-            /*    try {
-                    addMappingToIndex(newIndexName, TASK_DOC_TYPE, "/mappings_docType_task.json");
-                } catch (IOException e) {
-                    logger.error("Failed to add {} mapping", TASK_DOC_TYPE);
-                }*/
+                this.indexNameProvider.updateIndices(getAllIndexes());
             }
-            LOGGER.info("Rolled over '{}' index", newIndexName);
-
-
         } catch (Exception ex) {
             LOGGER.error("Exception in index rollover", ex);
         }
     }
 
     @Override
-    public IndexNameProvider getIndexNameProvider()
-    {
+    public IndexNameProvider getIndexNameProvider() {
         return indexNameProvider;
     }
 
     @Override
     public boolean isAliasIndexExists() {
-       boolean currentIndexName = false;
+        boolean currentIndexName = false;
 
         try {
             Response indicesResponse = elasticSearchAdminClient
@@ -191,17 +193,24 @@ public class IndexManagerRestDAOV5 implements IndexManager {
         return indexNames;
     }
 
-    public void deleteOldRolledOverIndex() throws IOException {
-        List<Index> indices = getAllIndexes();
-        if(indices.size() > config.getMaxBackupRolloverIndexToKeep())
-        {
-            String oldestIndexToDelete = Collections.min(indices).getName();
-            String resourcePath = "/" + oldestIndexToDelete;
+    private void deleteOldRolledOverIndex() {
+        try {
+            List<Index> indices = getAllIndexes();
+            if (indices.size() > config.getMaxBackupRolloverIndexToKeep()) {
+                String oldestIndexToDelete = Collections.min(indices).getName();
+                String resourcePath = "/" + oldestIndexToDelete;
 
-            Response response = elasticSearchAdminClient.performRequest(ElasticSearchRestDAOV5.HttpMethod.PUT, resourcePath, Collections.emptyMap());
-            if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                LOGGER.info("Deleted the rolled over index : {}", oldestIndexToDelete);
+                Response response = elasticSearchAdminClient.performRequest(
+                        ElasticSearchRestDAOV5.HttpMethod.DELETE,
+                        resourcePath,
+                        Collections.emptyMap());
+
+                if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                    LOGGER.info("Deleted the rolled over index : {}", oldestIndexToDelete);
+                }
             }
+        } catch (IOException ex) {
+            LOGGER.error("Exception in deleting rolled over index", ex);
         }
     }
 

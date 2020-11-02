@@ -45,6 +45,7 @@ public class RolloverUpdateListener implements RetryListener {
             if (documentMissingValidator.getUpdateDocumentMissingValidator().test(attempt)) {
                 UpdateRequest oldRequest = updateRequest.getRequest();
                 String newIndexName = indexNameProvider.getWriteIndexName((int) attempt.getAttemptNumber(), updateRequest.getCreatedTime());
+                //TODO: Handle failure
                 if (newIndexName == null) {
                     newIndexName = "conductor";
                 }

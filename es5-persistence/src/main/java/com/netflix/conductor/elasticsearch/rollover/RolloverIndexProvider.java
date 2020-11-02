@@ -63,9 +63,10 @@ public class RolloverIndexProvider implements IndexNameProvider {
     @Override
     public String getLookupRequestIndexName(int attempt) {
         Long curIndex = creationTimeToNameMap.lastKey();
-        int idx = 1;
+        int idx = 0; //Start with zero since the most recent index is already attempted for lookup request
         while (curIndex != null && idx < attempt) {
-            curIndex = creationTimeToNameMap.higherKey(curIndex);
+            curIndex = creationTimeToNameMap.lowerKey(curIndex);
+            idx++;
         }
 
         if (curIndex == null) {

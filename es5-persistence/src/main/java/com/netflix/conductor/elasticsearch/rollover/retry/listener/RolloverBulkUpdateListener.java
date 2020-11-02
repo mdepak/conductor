@@ -74,6 +74,7 @@ public class RolloverBulkUpdateListener implements RetryListener {
                             if (newIndexName != null) {
                                 newRequests.add(new RequestWrapper<>(copyUpdateRequest(oldUpdateRequest, newIndexName), requestWrapper.getCreatedTime()));
                             } else {
+                                //TODO: Handle failure
                                 logger.warn("Failed to update document of type {} with id {}", oldUpdateRequest.type(), oldUpdateRequest.id());
                             }
                             logger.info("Attempt : #{} Changing update index of {} request from {} to {}",

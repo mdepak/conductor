@@ -69,10 +69,7 @@ public class IndexManagerDAOV5 implements IndexManager {
         if (config.isRolloverIndexingEnabled()) {
             //FIXME: Change update frequency
             Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(this::rollOverIndex, 60, 60, TimeUnit.SECONDS);
-
-            if(config.isOldRolloverIndexDeletionEnabled()) {
-                Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(this::deleteOldRolledOverIndex, 60, 60, TimeUnit.SECONDS);
-            }
+            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(this::updateIndex,30,60, TimeUnit.SECONDS);
         }
     }
 
@@ -117,8 +114,14 @@ public class IndexManagerDAOV5 implements IndexManager {
                 LOGGER.info("Successfully created rollover index with new index: {} for old index : {}", newIndexName, rolloverResponse.getOldIndex());
                 //Rollover is successful; Update the workflow & task mappings
                 updateIndexMappings(newIndexName);
-                indexNameProvider.updateIndices(getAllIndexes());
+
+                //Delete the older indices based on the config
+                if (config.isOldRolloverIndexDeletionEnabled()) {
+                    deleteOldRolledOverIndex();
+                }
             }
+
+            indexNameProvider.updateIndices(getAllIndexes());
         } catch (Exception ex) {
             LOGGER.error("Exception in index rollover", ex);
         }
@@ -169,16 +172,20 @@ public class IndexManagerDAOV5 implements IndexManager {
     }
 
     public void deleteOldRolledOverIndex() {
-        List<Index> indices = getAllIndexes();
-        if (indices.size() > config.getMaxBackupRolloverIndexToKeep()) {
-            String oldestIndexToDelete = Collections.min(indices).getName();
+        try {
+            List<Index> indices = getAllIndexes();
+            if (indices.size() > config.getMaxBackupRolloverIndexToKeep()) {
+                String oldestIndexToDelete = Collections.min(indices).getName();
 
-            LOGGER.debug("Trying to delete the old rolled over index : {}", oldestIndexToDelete);
-            DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(oldestIndexToDelete);
-            DeleteIndexResponse response = elasticSearchClient.admin().indices().delete(deleteIndexRequest).actionGet();
-            if (response.isAcknowledged()) {
-                LOGGER.info("Deleted the rolled over index : {}", oldestIndexToDelete);
+                LOGGER.debug("Trying to delete the old rolled over index : {}", oldestIndexToDelete);
+                DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(oldestIndexToDelete);
+                DeleteIndexResponse response = elasticSearchClient.admin().indices().delete(deleteIndexRequest).actionGet();
+                if (response.isAcknowledged()) {
+                    LOGGER.info("Deleted the rolled over index : {}", oldestIndexToDelete);
+                }
             }
+        } catch (Exception ex) {
+            LOGGER.error("Exception in deleting rolled over index", ex);
         }
     }
 
