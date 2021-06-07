@@ -222,15 +222,15 @@
             ]
         },
         "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.9.1",
-            "requested": "2.9.1",
+            "locked": "2.11.1",
+            "requested": "2.11.1",
             "transitive": [
                 "org.apache.logging.log4j:log4j-core"
             ]
         },
         "org.apache.logging.log4j:log4j-core": {
-            "locked": "2.9.1",
-            "requested": "2.9.1"
+            "locked": "2.11.1",
+            "requested": "2.11.1"
         },
         "org.glassfish:javax.el": {
             "locked": "3.0.0",
@@ -454,43 +454,43 @@
             ]
         },
         "io.netty:netty-buffer": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-codec": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-codec-http": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-common": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-handler": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-resolver": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-transport": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
@@ -580,205 +580,200 @@
                 "org.elasticsearch.client:elasticsearch-rest-client"
             ]
         },
-        "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.11.1",
-            "requested": "2.9.1",
-            "transitive": [
-                "org.apache.logging.log4j:log4j-core",
-                "org.elasticsearch:elasticsearch"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-core": {
-            "locked": "2.9.1",
-            "requested": "2.9.1"
-        },
         "org.apache.lucene:lucene-analyzers-common": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-backward-codecs": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-core": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-grouping": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-highlighter": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-join": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-memory": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-misc": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-queries": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-queryparser": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-sandbox": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial-extras": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial3d": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-suggest": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.elasticsearch.client:elasticsearch-rest-client": {
-            "locked": "6.5.1",
-            "requested": "6.5.1",
+            "locked": "6.8.12",
+            "requested": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.plugin:reindex-client"
             ]
         },
         "org.elasticsearch.client:elasticsearch-rest-high-level-client": {
-            "locked": "6.5.1",
-            "requested": "6.5.1"
+            "locked": "6.8.12",
+            "requested": "6.8.12"
         },
         "org.elasticsearch.client:transport": {
-            "locked": "6.5.1",
-            "requested": "6.5.1"
+            "locked": "6.8.12",
+            "requested": "6.8.12"
         },
         "org.elasticsearch.plugin:aggs-matrix-stats-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client"
             ]
         },
         "org.elasticsearch.plugin:lang-mustache-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:parent-join-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:percolator-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:rank-eval-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:reindex-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:transport-netty4-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch:elasticsearch": {
-            "locked": "6.5.1",
-            "requested": "6.5.1",
+            "locked": "6.8.12",
+            "requested": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch:elasticsearch-cli": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.elasticsearch:elasticsearch-core": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch",
                 "org.elasticsearch:elasticsearch-cli",
+                "org.elasticsearch:elasticsearch-ssl-config",
                 "org.elasticsearch:elasticsearch-x-content"
             ]
         },
         "org.elasticsearch:elasticsearch-secure-sm": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
+        "org.elasticsearch:elasticsearch-ssl-config": {
+            "locked": "6.8.12",
+            "transitive": [
+                "org.elasticsearch.plugin:reindex-client"
+            ]
+        },
         "org.elasticsearch:elasticsearch-x-content": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.elasticsearch:jna": {
-            "locked": "4.5.1",
+            "locked": "5.5.0",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
@@ -880,43 +875,43 @@
             ]
         },
         "io.netty:netty-buffer": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-codec": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-codec-http": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-common": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-handler": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-resolver": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-transport": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
@@ -957,199 +952,200 @@
                 "org.elasticsearch.client:elasticsearch-rest-client"
             ]
         },
-        "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.11.1",
-            "transitive": [
-                "org.elasticsearch:elasticsearch"
-            ]
-        },
         "org.apache.lucene:lucene-analyzers-common": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-backward-codecs": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-core": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-grouping": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-highlighter": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-join": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-memory": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-misc": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-queries": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-queryparser": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-sandbox": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial-extras": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial3d": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-suggest": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.elasticsearch.client:elasticsearch-rest-client": {
-            "locked": "6.5.1",
-            "requested": "6.5.1",
+            "locked": "6.8.12",
+            "requested": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.plugin:reindex-client"
             ]
         },
         "org.elasticsearch.client:elasticsearch-rest-high-level-client": {
-            "locked": "6.5.1",
-            "requested": "6.5.1"
+            "locked": "6.8.12",
+            "requested": "6.8.12"
         },
         "org.elasticsearch.client:transport": {
-            "locked": "6.5.1",
-            "requested": "6.5.1"
+            "locked": "6.8.12",
+            "requested": "6.8.12"
         },
         "org.elasticsearch.plugin:aggs-matrix-stats-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client"
             ]
         },
         "org.elasticsearch.plugin:lang-mustache-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:parent-join-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:percolator-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:rank-eval-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:reindex-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:transport-netty4-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch:elasticsearch": {
-            "locked": "6.5.1",
-            "requested": "6.5.1",
+            "locked": "6.8.12",
+            "requested": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch:elasticsearch-cli": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.elasticsearch:elasticsearch-core": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch",
                 "org.elasticsearch:elasticsearch-cli",
+                "org.elasticsearch:elasticsearch-ssl-config",
                 "org.elasticsearch:elasticsearch-x-content"
             ]
         },
         "org.elasticsearch:elasticsearch-secure-sm": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
+        "org.elasticsearch:elasticsearch-ssl-config": {
+            "locked": "6.8.12",
+            "transitive": [
+                "org.elasticsearch.plugin:reindex-client"
+            ]
+        },
         "org.elasticsearch:elasticsearch-x-content": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.elasticsearch:jna": {
-            "locked": "4.5.1",
+            "locked": "5.5.0",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
@@ -1388,17 +1384,6 @@
             "transitive": [
                 "org.apache.httpcomponents:httpclient"
             ]
-        },
-        "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.9.1",
-            "requested": "2.9.1",
-            "transitive": [
-                "org.apache.logging.log4j:log4j-core"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-core": {
-            "locked": "2.9.1",
-            "requested": "2.9.1"
         },
         "org.glassfish:javax.el": {
             "locked": "3.0.0",
@@ -1714,17 +1699,6 @@
                 "org.apache.httpcomponents:httpclient"
             ]
         },
-        "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.9.1",
-            "requested": "2.9.1",
-            "transitive": [
-                "org.apache.logging.log4j:log4j-core"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-core": {
-            "locked": "2.9.1",
-            "requested": "2.9.1"
-        },
         "org.glassfish:javax.el": {
             "locked": "3.0.0",
             "transitive": [
@@ -1976,17 +1950,6 @@
                 "org.apache.httpcomponents:httpclient"
             ]
         },
-        "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.9.1",
-            "requested": "2.9.1",
-            "transitive": [
-                "org.apache.logging.log4j:log4j-core"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-core": {
-            "locked": "2.9.1",
-            "requested": "2.9.1"
-        },
         "org.glassfish:javax.el": {
             "locked": "3.0.0",
             "transitive": [
@@ -2072,43 +2035,43 @@
             ]
         },
         "io.netty:netty-buffer": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-codec": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-codec-http": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-common": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-handler": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-resolver": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-transport": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
@@ -2149,199 +2112,200 @@
                 "org.elasticsearch.client:elasticsearch-rest-client"
             ]
         },
-        "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.11.1",
-            "transitive": [
-                "org.elasticsearch:elasticsearch"
-            ]
-        },
         "org.apache.lucene:lucene-analyzers-common": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-backward-codecs": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-core": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-grouping": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-highlighter": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-join": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-memory": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-misc": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-queries": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-queryparser": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-sandbox": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial-extras": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial3d": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-suggest": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.elasticsearch.client:elasticsearch-rest-client": {
-            "locked": "6.5.1",
-            "requested": "6.5.1",
+            "locked": "6.8.12",
+            "requested": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.plugin:reindex-client"
             ]
         },
         "org.elasticsearch.client:elasticsearch-rest-high-level-client": {
-            "locked": "6.5.1",
-            "requested": "6.5.1"
+            "locked": "6.8.12",
+            "requested": "6.8.12"
         },
         "org.elasticsearch.client:transport": {
-            "locked": "6.5.1",
-            "requested": "6.5.1"
+            "locked": "6.8.12",
+            "requested": "6.8.12"
         },
         "org.elasticsearch.plugin:aggs-matrix-stats-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client"
             ]
         },
         "org.elasticsearch.plugin:lang-mustache-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:parent-join-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:percolator-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:rank-eval-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:reindex-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:transport-netty4-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch:elasticsearch": {
-            "locked": "6.5.1",
-            "requested": "6.5.1",
+            "locked": "6.8.12",
+            "requested": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch:elasticsearch-cli": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.elasticsearch:elasticsearch-core": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch",
                 "org.elasticsearch:elasticsearch-cli",
+                "org.elasticsearch:elasticsearch-ssl-config",
                 "org.elasticsearch:elasticsearch-x-content"
             ]
         },
         "org.elasticsearch:elasticsearch-secure-sm": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
+        "org.elasticsearch:elasticsearch-ssl-config": {
+            "locked": "6.8.12",
+            "transitive": [
+                "org.elasticsearch.plugin:reindex-client"
+            ]
+        },
         "org.elasticsearch:elasticsearch-x-content": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.elasticsearch:jna": {
-            "locked": "4.5.1",
+            "locked": "5.5.0",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
@@ -2552,43 +2516,43 @@
             ]
         },
         "io.netty:netty-buffer": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-codec": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-codec-http": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-common": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-handler": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-resolver": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-transport": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
@@ -2700,104 +2664,92 @@
                 "org.elasticsearch.client:elasticsearch-rest-client"
             ]
         },
-        "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.11.1",
-            "requested": "2.9.1",
-            "transitive": [
-                "org.apache.logging.log4j:log4j-core",
-                "org.elasticsearch:elasticsearch"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-core": {
-            "locked": "2.9.1",
-            "requested": "2.9.1"
-        },
         "org.apache.lucene:lucene-analyzers-common": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-backward-codecs": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-core": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-grouping": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-highlighter": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-join": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-memory": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-misc": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-queries": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-queryparser": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-sandbox": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial-extras": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial3d": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-suggest": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
@@ -2807,102 +2759,109 @@
             "requested": "3.1.2"
         },
         "org.elasticsearch.client:elasticsearch-rest-client": {
-            "locked": "6.5.1",
-            "requested": "6.5.1",
+            "locked": "6.8.12",
+            "requested": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.plugin:reindex-client"
             ]
         },
         "org.elasticsearch.client:elasticsearch-rest-high-level-client": {
-            "locked": "6.5.1",
-            "requested": "6.5.1"
+            "locked": "6.8.12",
+            "requested": "6.8.12"
         },
         "org.elasticsearch.client:transport": {
-            "locked": "6.5.1",
-            "requested": "6.5.1"
+            "locked": "6.8.12",
+            "requested": "6.8.12"
         },
         "org.elasticsearch.plugin:aggs-matrix-stats-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client"
             ]
         },
         "org.elasticsearch.plugin:lang-mustache-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:parent-join-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:percolator-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:rank-eval-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:reindex-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:transport-netty4-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch:elasticsearch": {
-            "locked": "6.5.1",
-            "requested": "6.5.1",
+            "locked": "6.8.12",
+            "requested": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch:elasticsearch-cli": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.elasticsearch:elasticsearch-core": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch",
                 "org.elasticsearch:elasticsearch-cli",
+                "org.elasticsearch:elasticsearch-ssl-config",
                 "org.elasticsearch:elasticsearch-x-content"
             ]
         },
         "org.elasticsearch:elasticsearch-secure-sm": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
+        "org.elasticsearch:elasticsearch-ssl-config": {
+            "locked": "6.8.12",
+            "transitive": [
+                "org.elasticsearch.plugin:reindex-client"
+            ]
+        },
         "org.elasticsearch:elasticsearch-x-content": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.elasticsearch:jna": {
-            "locked": "4.5.1",
+            "locked": "5.5.0",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
@@ -3171,43 +3130,43 @@
             ]
         },
         "io.netty:netty-buffer": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-codec": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-codec-http": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-common": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-handler": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-resolver": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-transport": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
@@ -3319,104 +3278,92 @@
                 "org.elasticsearch.client:elasticsearch-rest-client"
             ]
         },
-        "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.11.1",
-            "requested": "2.9.1",
-            "transitive": [
-                "org.apache.logging.log4j:log4j-core",
-                "org.elasticsearch:elasticsearch"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-core": {
-            "locked": "2.9.1",
-            "requested": "2.9.1"
-        },
         "org.apache.lucene:lucene-analyzers-common": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-backward-codecs": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-core": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-grouping": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-highlighter": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-join": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-memory": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-misc": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-queries": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-queryparser": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-sandbox": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial-extras": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial3d": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-suggest": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
@@ -3426,102 +3373,109 @@
             "requested": "3.1.2"
         },
         "org.elasticsearch.client:elasticsearch-rest-client": {
-            "locked": "6.5.1",
-            "requested": "6.5.1",
+            "locked": "6.8.12",
+            "requested": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.plugin:reindex-client"
             ]
         },
         "org.elasticsearch.client:elasticsearch-rest-high-level-client": {
-            "locked": "6.5.1",
-            "requested": "6.5.1"
+            "locked": "6.8.12",
+            "requested": "6.8.12"
         },
         "org.elasticsearch.client:transport": {
-            "locked": "6.5.1",
-            "requested": "6.5.1"
+            "locked": "6.8.12",
+            "requested": "6.8.12"
         },
         "org.elasticsearch.plugin:aggs-matrix-stats-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client"
             ]
         },
         "org.elasticsearch.plugin:lang-mustache-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:parent-join-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:percolator-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:rank-eval-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:reindex-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:transport-netty4-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch:elasticsearch": {
-            "locked": "6.5.1",
-            "requested": "6.5.1",
+            "locked": "6.8.12",
+            "requested": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch:elasticsearch-cli": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.elasticsearch:elasticsearch-core": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch",
                 "org.elasticsearch:elasticsearch-cli",
+                "org.elasticsearch:elasticsearch-ssl-config",
                 "org.elasticsearch:elasticsearch-x-content"
             ]
         },
         "org.elasticsearch:elasticsearch-secure-sm": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
+        "org.elasticsearch:elasticsearch-ssl-config": {
+            "locked": "6.8.12",
+            "transitive": [
+                "org.elasticsearch.plugin:reindex-client"
+            ]
+        },
         "org.elasticsearch:elasticsearch-x-content": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.elasticsearch:jna": {
-            "locked": "4.5.1",
+            "locked": "5.5.0",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
@@ -3790,43 +3744,43 @@
             ]
         },
         "io.netty:netty-buffer": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-codec": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-codec-http": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-common": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-handler": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-resolver": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-transport": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
@@ -3938,104 +3892,92 @@
                 "org.elasticsearch.client:elasticsearch-rest-client"
             ]
         },
-        "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.11.1",
-            "requested": "2.9.1",
-            "transitive": [
-                "org.apache.logging.log4j:log4j-core",
-                "org.elasticsearch:elasticsearch"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-core": {
-            "locked": "2.9.1",
-            "requested": "2.9.1"
-        },
         "org.apache.lucene:lucene-analyzers-common": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-backward-codecs": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-core": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-grouping": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-highlighter": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-join": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-memory": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-misc": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-queries": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-queryparser": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-sandbox": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial-extras": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial3d": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-suggest": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
@@ -4045,102 +3987,109 @@
             "requested": "3.1.2"
         },
         "org.elasticsearch.client:elasticsearch-rest-client": {
-            "locked": "6.5.1",
-            "requested": "6.5.1",
+            "locked": "6.8.12",
+            "requested": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.plugin:reindex-client"
             ]
         },
         "org.elasticsearch.client:elasticsearch-rest-high-level-client": {
-            "locked": "6.5.1",
-            "requested": "6.5.1"
+            "locked": "6.8.12",
+            "requested": "6.8.12"
         },
         "org.elasticsearch.client:transport": {
-            "locked": "6.5.1",
-            "requested": "6.5.1"
+            "locked": "6.8.12",
+            "requested": "6.8.12"
         },
         "org.elasticsearch.plugin:aggs-matrix-stats-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client"
             ]
         },
         "org.elasticsearch.plugin:lang-mustache-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:parent-join-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:percolator-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:rank-eval-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:reindex-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:transport-netty4-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch:elasticsearch": {
-            "locked": "6.5.1",
-            "requested": "6.5.1",
+            "locked": "6.8.12",
+            "requested": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch:elasticsearch-cli": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.elasticsearch:elasticsearch-core": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch",
                 "org.elasticsearch:elasticsearch-cli",
+                "org.elasticsearch:elasticsearch-ssl-config",
                 "org.elasticsearch:elasticsearch-x-content"
             ]
         },
         "org.elasticsearch:elasticsearch-secure-sm": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
+        "org.elasticsearch:elasticsearch-ssl-config": {
+            "locked": "6.8.12",
+            "transitive": [
+                "org.elasticsearch.plugin:reindex-client"
+            ]
+        },
         "org.elasticsearch:elasticsearch-x-content": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.elasticsearch:jna": {
-            "locked": "4.5.1",
+            "locked": "5.5.0",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
@@ -4409,43 +4358,43 @@
             ]
         },
         "io.netty:netty-buffer": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-codec": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-codec-http": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-common": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-handler": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-resolver": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "io.netty:netty-transport": {
-            "locked": "4.1.30.Final",
+            "locked": "4.1.32.Final",
             "transitive": [
                 "org.elasticsearch.plugin:transport-netty4-client"
             ]
@@ -4557,104 +4506,92 @@
                 "org.elasticsearch.client:elasticsearch-rest-client"
             ]
         },
-        "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.11.1",
-            "requested": "2.9.1",
-            "transitive": [
-                "org.apache.logging.log4j:log4j-core",
-                "org.elasticsearch:elasticsearch"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-core": {
-            "locked": "2.9.1",
-            "requested": "2.9.1"
-        },
         "org.apache.lucene:lucene-analyzers-common": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-backward-codecs": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-core": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-grouping": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-highlighter": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-join": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-memory": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-misc": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-queries": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-queryparser": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-sandbox": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial-extras": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-spatial3d": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.apache.lucene:lucene-suggest": {
-            "locked": "7.5.0",
+            "locked": "7.7.3",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
@@ -4664,102 +4601,109 @@
             "requested": "3.1.2"
         },
         "org.elasticsearch.client:elasticsearch-rest-client": {
-            "locked": "6.5.1",
-            "requested": "6.5.1",
+            "locked": "6.8.12",
+            "requested": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.plugin:reindex-client"
             ]
         },
         "org.elasticsearch.client:elasticsearch-rest-high-level-client": {
-            "locked": "6.5.1",
-            "requested": "6.5.1"
+            "locked": "6.8.12",
+            "requested": "6.8.12"
         },
         "org.elasticsearch.client:transport": {
-            "locked": "6.5.1",
-            "requested": "6.5.1"
+            "locked": "6.8.12",
+            "requested": "6.8.12"
         },
         "org.elasticsearch.plugin:aggs-matrix-stats-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client"
             ]
         },
         "org.elasticsearch.plugin:lang-mustache-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:parent-join-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:percolator-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:rank-eval-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:reindex-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch.plugin:transport-netty4-client": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch:elasticsearch": {
-            "locked": "6.5.1",
-            "requested": "6.5.1",
+            "locked": "6.8.12",
+            "requested": "6.8.12",
             "transitive": [
                 "org.elasticsearch.client:elasticsearch-rest-high-level-client",
                 "org.elasticsearch.client:transport"
             ]
         },
         "org.elasticsearch:elasticsearch-cli": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.elasticsearch:elasticsearch-core": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch",
                 "org.elasticsearch:elasticsearch-cli",
+                "org.elasticsearch:elasticsearch-ssl-config",
                 "org.elasticsearch:elasticsearch-x-content"
             ]
         },
         "org.elasticsearch:elasticsearch-secure-sm": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
+        "org.elasticsearch:elasticsearch-ssl-config": {
+            "locked": "6.8.12",
+            "transitive": [
+                "org.elasticsearch.plugin:reindex-client"
+            ]
+        },
         "org.elasticsearch:elasticsearch-x-content": {
-            "locked": "6.5.1",
+            "locked": "6.8.12",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]
         },
         "org.elasticsearch:jna": {
-            "locked": "4.5.1",
+            "locked": "5.5.0",
             "transitive": [
                 "org.elasticsearch:elasticsearch"
             ]

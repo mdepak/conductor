@@ -28,11 +28,7 @@ import com.netflix.conductor.common.run.Workflow;
 import com.netflix.conductor.common.utils.EnvUtils;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import com.netflix.conductor.common.utils.JsonMapperProvider;
@@ -88,6 +84,7 @@ public class ParametersUtils {
         workflowParams.put("correlationId", workflow.getCorrelationId());
         workflowParams.put("reasonForIncompletion", workflow.getReasonForIncompletion());
         workflowParams.put("schemaVersion", workflow.getSchemaVersion());
+        workflowParams.put("variables", workflow.getVariables());
 
         inputMap.put("workflow", workflowParams);
 
@@ -201,11 +198,11 @@ public class ParametersUtils {
     }
 
     private Object replaceVariables(String paramString, DocumentContext documentContext, String taskId) {
-        String[] values = paramString.split("(?=\\$\\{)|(?<=\\})");
+        String[] values = paramString.split("(?=(?<!\\$)\\$\\{)|(?<=\\})");
         Object[] convertedValues = new Object[values.length];
         for (int i = 0; i < values.length; i++) {
             convertedValues[i] = values[i];
-            if (values !=null && values[i].startsWith("${") && values[i].endsWith("}")) {
+            if (values[i].startsWith("${") && values[i].endsWith("}")) {
                 String paramPath = values[i].substring(2, values[i].length() - 1);
                 if (EnvUtils.isEnvironmentVariable(paramPath)) {
                     String sysValue = EnvUtils.getSystemParametersValue(paramPath, taskId);
@@ -221,7 +218,8 @@ public class ParametersUtils {
                         convertedValues[i] = null;
                     }
                 }
-
+            } else if (values[i].contains("$${")) {
+                convertedValues[i] = values[i].replaceAll("\\$\\$\\{", "\\${");
             }
         }
 

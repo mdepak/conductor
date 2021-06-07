@@ -18,6 +18,7 @@ import static com.netflix.conductor.common.metadata.tasks.Task.Status.SCHEDULED;
 import static com.netflix.conductor.common.metadata.tasks.Task.Status.SKIPPED;
 import static com.netflix.conductor.common.metadata.tasks.Task.Status.TIMED_OUT;
 import static com.netflix.conductor.common.metadata.workflow.TaskType.SUB_WORKFLOW;
+import static com.netflix.conductor.common.metadata.workflow.TaskType.TERMINATE;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.netflix.conductor.common.metadata.tasks.Task;
@@ -73,6 +74,10 @@ public class DeciderService {
     private final Map<String, TaskMapper> taskMappers;
 
     private final Predicate<Task> isNonPendingTask = task -> !task.isRetried() && !task.getStatus().equals(SKIPPED) && !task.isExecuted();
+
+    private final Predicate<Workflow> containsSuccessfulTerminateTask = workflow -> workflow.getTasks().stream()
+        .anyMatch(task -> TERMINATE.name().equals(task.getTaskType())
+            && task.getStatus().isTerminal() && task.getStatus().isSuccessful());
 
     private static final String PENDING_TASK_TIME_THRESHOLD_PROPERTY_NAME = "workflow.task.pending.time.threshold.minutes";
 
@@ -215,7 +220,8 @@ public class DeciderService {
                     workflow.getWorkflowId());
             outcome.tasksToBeScheduled.addAll(unScheduledTasks);
         }
-        if (outcome.tasksToBeScheduled.isEmpty() && checkForWorkflowCompletion(workflow)) {
+        if (containsSuccessfulTerminateTask.test(workflow) || (outcome.tasksToBeScheduled.isEmpty()
+            && checkForWorkflowCompletion(workflow))) {
             LOGGER.debug("Marking workflow: {} as complete.", workflow);
             outcome.isComplete = true;
         }
@@ -223,7 +229,8 @@ public class DeciderService {
         return outcome;
     }
 
-    protected List<Task> filterNextLoopOverTasks(List<Task> tasks, Task pendingTask, Workflow workflow) {
+    @VisibleForTesting
+    List<Task> filterNextLoopOverTasks(List<Task> tasks, Task pendingTask, Workflow workflow) {
 
         //Update the task reference name and iteration
         tasks.forEach(nextTask -> {
@@ -295,6 +302,17 @@ public class DeciderService {
             return;
         }
 
+        Optional<Task> terminateTask = allTasks.stream()
+            .filter(t -> TaskType.TERMINATE.name().equals(t.getTaskType()) && t.getStatus().isTerminal()
+                && t.getStatus().isSuccessful())
+            .findFirst();
+        if (terminateTask.isPresent()) {
+            if (!terminateTask.get().getOutputData().isEmpty()) {
+                workflow.setOutput(terminateTask.get().getOutputData());
+            }
+            return;
+        }
+
         Task last = Optional.ofNullable(task).orElse(allTasks.get(allTasks.size() - 1));
 
         WorkflowDef workflowDef = workflow.getWorkflowDefinition();
@@ -313,10 +331,15 @@ public class DeciderService {
         externalizeWorkflowData(workflow);
     }
 
-    private boolean checkForWorkflowCompletion(final Workflow workflow) throws TerminateWorkflowException {
+    @VisibleForTesting
+    boolean checkForWorkflowCompletion(final Workflow workflow) throws TerminateWorkflowException {
         List<Task> allTasks = workflow.getTasks();
         if (allTasks.isEmpty()) {
             return false;
+        }
+
+        if (containsSuccessfulTerminateTask.test(workflow)) {
+            return true;
         }
 
         Map<String, Status> taskStatusMap = new HashMap<>();
@@ -344,7 +367,8 @@ public class DeciderService {
         return allCompletedSuccessfully && noPendingTasks && noPendingSchedule;
     }
 
-    private List<Task> getNextTask(Workflow workflow, Task task) {
+    @VisibleForTesting
+    List<Task> getNextTask(Workflow workflow, Task task) {
         final WorkflowDef workflowDef = workflow.getWorkflowDefinition();
 
         // Get the following task after the last completed task
@@ -358,6 +382,13 @@ public class DeciderService {
         WorkflowTask taskToSchedule = workflowDef.getNextTask(taskReferenceName);
         while (isTaskSkipped(taskToSchedule, workflow)) {
             taskToSchedule = workflowDef.getNextTask(taskToSchedule.getTaskReferenceName());
+        }
+        if (taskToSchedule != null && TaskType.DO_WHILE.name().equals(taskToSchedule.getType())) {
+            // check if already has this DO_WHILE task, ignore it if it already exists
+            String nextTaskReferenceName = taskToSchedule.getTaskReferenceName();
+            if (workflow.getTasks().stream().anyMatch(runningTask -> runningTask.getReferenceTaskName().equals(nextTaskReferenceName))) {
+                return Collections.emptyList();
+            }
         }
         if (taskToSchedule != null) {
             return getTasksToBeScheduled(workflow, taskToSchedule, 0);
@@ -391,7 +422,18 @@ public class DeciderService {
             if (workflowTask != null && workflowTask.isOptional()) {
                 return Optional.empty();
             }
-            WorkflowStatus status = task.getStatus().equals(TIMED_OUT) ? WorkflowStatus.TIMED_OUT : WorkflowStatus.FAILED;
+            WorkflowStatus status;
+            switch (task.getStatus()) {
+                case CANCELED:
+                    status = WorkflowStatus.TERMINATED;
+                    break;
+                case TIMED_OUT:
+                    status = WorkflowStatus.TIMED_OUT;
+                    break;
+                default:
+                    status = WorkflowStatus.FAILED;
+                    break;
+            }
             updateWorkflowOutput(workflow, task);
             throw new TerminateWorkflowException(task.getReasonForIncompletion(), status, task);
         }
@@ -501,7 +543,8 @@ public class DeciderService {
 
         long timeout = 1000L * workflowDef.getTimeoutSeconds();
         long now = System.currentTimeMillis();
-        long elapsedTime = now - workflow.getStartTime();
+        long elapsedTime = workflow.getLastRetriedTime() > 0 ? now - workflow.getLastRetriedTime() :
+            now - workflow.getStartTime();
 
         if (elapsedTime < timeout) {
             return;

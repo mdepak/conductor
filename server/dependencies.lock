@@ -14,7 +14,7 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-core": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -34,13 +34,13 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-sqs": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
         },
         "com.amazonaws:jmespath-java": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -1133,7 +1133,7 @@
             ]
         },
         "net.thisptr:jackson-jq": {
-            "locked": "0.0.11",
+            "locked": "0.0.12",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
@@ -1207,7 +1207,7 @@
             ]
         },
         "org.apache.httpcomponents:httpclient": {
-            "locked": "4.5.9",
+            "locked": "4.5.13",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-core",
                 "com.netflix.dyno:dyno-contrib",
@@ -1222,7 +1222,7 @@
             ]
         },
         "org.apache.httpcomponents:httpcore": {
-            "locked": "4.4.11",
+            "locked": "4.4.13",
             "transitive": [
                 "org.apache.httpcomponents:httpclient",
                 "org.elasticsearch.client:elasticsearch-rest-client"
@@ -1241,7 +1241,7 @@
             ]
         },
         "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.9.1",
+            "locked": "2.11.1",
             "transitive": [
                 "com.netflix.conductor:conductor-es5-persistence",
                 "com.netflix.conductor:conductor-es6-persistence",
@@ -1257,7 +1257,7 @@
             ]
         },
         "org.apache.logging.log4j:log4j-core": {
-            "locked": "2.9.1",
+            "locked": "2.11.1",
             "transitive": [
                 "com.netflix.conductor:conductor-es5-persistence",
                 "com.netflix.conductor:conductor-es6-persistence",
@@ -1520,7 +1520,7 @@
             ]
         },
         "org.flywaydb:flyway-core": {
-            "locked": "4.0.3",
+            "locked": "7.5.2",
             "transitive": [
                 "com.netflix.conductor:conductor-mysql-persistence",
                 "com.netflix.conductor:conductor-postgres-persistence"
@@ -1790,7 +1790,7 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-core": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -1810,13 +1810,13 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-sqs": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
         },
         "com.amazonaws:jmespath-java": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -2909,7 +2909,7 @@
             ]
         },
         "net.thisptr:jackson-jq": {
-            "locked": "0.0.11",
+            "locked": "0.0.12",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
@@ -2983,7 +2983,7 @@
             ]
         },
         "org.apache.httpcomponents:httpclient": {
-            "locked": "4.5.9",
+            "locked": "4.5.13",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-core",
                 "com.netflix.dyno:dyno-contrib",
@@ -2998,7 +2998,7 @@
             ]
         },
         "org.apache.httpcomponents:httpcore": {
-            "locked": "4.4.11",
+            "locked": "4.4.13",
             "transitive": [
                 "org.apache.httpcomponents:httpclient",
                 "org.elasticsearch.client:elasticsearch-rest-client"
@@ -3014,36 +3014,6 @@
             "locked": "2.2.0",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.9.1",
-            "transitive": [
-                "com.netflix.conductor:conductor-es5-persistence",
-                "com.netflix.conductor:conductor-es6-persistence",
-                "org.apache.logging.log4j:log4j-core",
-                "org.elasticsearch.plugin:aggs-matrix-stats-client",
-                "org.elasticsearch.plugin:lang-mustache-client",
-                "org.elasticsearch.plugin:parent-join-client",
-                "org.elasticsearch.plugin:percolator-client",
-                "org.elasticsearch.plugin:reindex-client",
-                "org.elasticsearch.plugin:transport-netty3-client",
-                "org.elasticsearch.plugin:transport-netty4-client",
-                "org.elasticsearch:elasticsearch"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-core": {
-            "locked": "2.9.1",
-            "transitive": [
-                "com.netflix.conductor:conductor-es5-persistence",
-                "com.netflix.conductor:conductor-es6-persistence",
-                "org.elasticsearch.plugin:aggs-matrix-stats-client",
-                "org.elasticsearch.plugin:lang-mustache-client",
-                "org.elasticsearch.plugin:parent-join-client",
-                "org.elasticsearch.plugin:percolator-client",
-                "org.elasticsearch.plugin:reindex-client",
-                "org.elasticsearch.plugin:transport-netty3-client",
-                "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "org.apache.lucene:lucene-analyzers-common": {
@@ -3296,7 +3266,7 @@
             ]
         },
         "org.flywaydb:flyway-core": {
-            "locked": "4.0.3",
+            "locked": "7.5.2",
             "transitive": [
                 "com.netflix.conductor:conductor-mysql-persistence",
                 "com.netflix.conductor:conductor-postgres-persistence"
@@ -3566,7 +3536,7 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-core": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -3586,13 +3556,13 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-sqs": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
         },
         "com.amazonaws:jmespath-java": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -4685,7 +4655,7 @@
             ]
         },
         "net.thisptr:jackson-jq": {
-            "locked": "0.0.11",
+            "locked": "0.0.12",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
@@ -4759,7 +4729,7 @@
             ]
         },
         "org.apache.httpcomponents:httpclient": {
-            "locked": "4.5.9",
+            "locked": "4.5.13",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-core",
                 "com.netflix.dyno:dyno-contrib",
@@ -4774,7 +4744,7 @@
             ]
         },
         "org.apache.httpcomponents:httpcore": {
-            "locked": "4.4.11",
+            "locked": "4.4.13",
             "transitive": [
                 "org.apache.httpcomponents:httpclient",
                 "org.elasticsearch.client:elasticsearch-rest-client"
@@ -4790,36 +4760,6 @@
             "locked": "2.2.0",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.9.1",
-            "transitive": [
-                "com.netflix.conductor:conductor-es5-persistence",
-                "com.netflix.conductor:conductor-es6-persistence",
-                "org.apache.logging.log4j:log4j-core",
-                "org.elasticsearch.plugin:aggs-matrix-stats-client",
-                "org.elasticsearch.plugin:lang-mustache-client",
-                "org.elasticsearch.plugin:parent-join-client",
-                "org.elasticsearch.plugin:percolator-client",
-                "org.elasticsearch.plugin:reindex-client",
-                "org.elasticsearch.plugin:transport-netty3-client",
-                "org.elasticsearch.plugin:transport-netty4-client",
-                "org.elasticsearch:elasticsearch"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-core": {
-            "locked": "2.9.1",
-            "transitive": [
-                "com.netflix.conductor:conductor-es5-persistence",
-                "com.netflix.conductor:conductor-es6-persistence",
-                "org.elasticsearch.plugin:aggs-matrix-stats-client",
-                "org.elasticsearch.plugin:lang-mustache-client",
-                "org.elasticsearch.plugin:parent-join-client",
-                "org.elasticsearch.plugin:percolator-client",
-                "org.elasticsearch.plugin:reindex-client",
-                "org.elasticsearch.plugin:transport-netty3-client",
-                "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "org.apache.lucene:lucene-analyzers-common": {
@@ -5072,7 +5012,7 @@
             ]
         },
         "org.flywaydb:flyway-core": {
-            "locked": "4.0.3",
+            "locked": "7.5.2",
             "transitive": [
                 "com.netflix.conductor:conductor-mysql-persistence",
                 "com.netflix.conductor:conductor-postgres-persistence"
@@ -5342,7 +5282,7 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-core": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -5362,13 +5302,13 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-sqs": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
         },
         "com.amazonaws:jmespath-java": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -6461,7 +6401,7 @@
             ]
         },
         "net.thisptr:jackson-jq": {
-            "locked": "0.0.11",
+            "locked": "0.0.12",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
@@ -6535,7 +6475,7 @@
             ]
         },
         "org.apache.httpcomponents:httpclient": {
-            "locked": "4.5.9",
+            "locked": "4.5.13",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-core",
                 "com.netflix.dyno:dyno-contrib",
@@ -6550,7 +6490,7 @@
             ]
         },
         "org.apache.httpcomponents:httpcore": {
-            "locked": "4.4.11",
+            "locked": "4.4.13",
             "transitive": [
                 "org.apache.httpcomponents:httpclient",
                 "org.elasticsearch.client:elasticsearch-rest-client"
@@ -6566,36 +6506,6 @@
             "locked": "2.2.0",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.9.1",
-            "transitive": [
-                "com.netflix.conductor:conductor-es5-persistence",
-                "com.netflix.conductor:conductor-es6-persistence",
-                "org.apache.logging.log4j:log4j-core",
-                "org.elasticsearch.plugin:aggs-matrix-stats-client",
-                "org.elasticsearch.plugin:lang-mustache-client",
-                "org.elasticsearch.plugin:parent-join-client",
-                "org.elasticsearch.plugin:percolator-client",
-                "org.elasticsearch.plugin:reindex-client",
-                "org.elasticsearch.plugin:transport-netty3-client",
-                "org.elasticsearch.plugin:transport-netty4-client",
-                "org.elasticsearch:elasticsearch"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-core": {
-            "locked": "2.9.1",
-            "transitive": [
-                "com.netflix.conductor:conductor-es5-persistence",
-                "com.netflix.conductor:conductor-es6-persistence",
-                "org.elasticsearch.plugin:aggs-matrix-stats-client",
-                "org.elasticsearch.plugin:lang-mustache-client",
-                "org.elasticsearch.plugin:parent-join-client",
-                "org.elasticsearch.plugin:percolator-client",
-                "org.elasticsearch.plugin:reindex-client",
-                "org.elasticsearch.plugin:transport-netty3-client",
-                "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "org.apache.lucene:lucene-analyzers-common": {
@@ -6848,7 +6758,7 @@
             ]
         },
         "org.flywaydb:flyway-core": {
-            "locked": "4.0.3",
+            "locked": "7.5.2",
             "transitive": [
                 "com.netflix.conductor:conductor-mysql-persistence",
                 "com.netflix.conductor:conductor-postgres-persistence"
@@ -8186,7 +8096,7 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-core": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -8206,13 +8116,13 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-sqs": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
         },
         "com.amazonaws:jmespath-java": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -9305,7 +9215,7 @@
             ]
         },
         "net.thisptr:jackson-jq": {
-            "locked": "0.0.11",
+            "locked": "0.0.12",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
@@ -9379,7 +9289,7 @@
             ]
         },
         "org.apache.httpcomponents:httpclient": {
-            "locked": "4.5.9",
+            "locked": "4.5.13",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-core",
                 "com.netflix.dyno:dyno-contrib",
@@ -9394,7 +9304,7 @@
             ]
         },
         "org.apache.httpcomponents:httpcore": {
-            "locked": "4.4.11",
+            "locked": "4.4.13",
             "transitive": [
                 "org.apache.httpcomponents:httpclient",
                 "org.elasticsearch.client:elasticsearch-rest-client"
@@ -9410,36 +9320,6 @@
             "locked": "2.2.0",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.9.1",
-            "transitive": [
-                "com.netflix.conductor:conductor-es5-persistence",
-                "com.netflix.conductor:conductor-es6-persistence",
-                "org.apache.logging.log4j:log4j-core",
-                "org.elasticsearch.plugin:aggs-matrix-stats-client",
-                "org.elasticsearch.plugin:lang-mustache-client",
-                "org.elasticsearch.plugin:parent-join-client",
-                "org.elasticsearch.plugin:percolator-client",
-                "org.elasticsearch.plugin:reindex-client",
-                "org.elasticsearch.plugin:transport-netty3-client",
-                "org.elasticsearch.plugin:transport-netty4-client",
-                "org.elasticsearch:elasticsearch"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-core": {
-            "locked": "2.9.1",
-            "transitive": [
-                "com.netflix.conductor:conductor-es5-persistence",
-                "com.netflix.conductor:conductor-es6-persistence",
-                "org.elasticsearch.plugin:aggs-matrix-stats-client",
-                "org.elasticsearch.plugin:lang-mustache-client",
-                "org.elasticsearch.plugin:parent-join-client",
-                "org.elasticsearch.plugin:percolator-client",
-                "org.elasticsearch.plugin:reindex-client",
-                "org.elasticsearch.plugin:transport-netty3-client",
-                "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "org.apache.lucene:lucene-analyzers-common": {
@@ -9692,7 +9572,7 @@
             ]
         },
         "org.flywaydb:flyway-core": {
-            "locked": "4.0.3",
+            "locked": "7.5.2",
             "transitive": [
                 "com.netflix.conductor:conductor-mysql-persistence",
                 "com.netflix.conductor:conductor-postgres-persistence"
@@ -9962,7 +9842,7 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-core": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -9982,13 +9862,13 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-sqs": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
         },
         "com.amazonaws:jmespath-java": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -11081,7 +10961,7 @@
             ]
         },
         "net.thisptr:jackson-jq": {
-            "locked": "0.0.11",
+            "locked": "0.0.12",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
@@ -11155,7 +11035,7 @@
             ]
         },
         "org.apache.httpcomponents:httpclient": {
-            "locked": "4.5.9",
+            "locked": "4.5.13",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-core",
                 "com.netflix.dyno:dyno-contrib",
@@ -11170,7 +11050,7 @@
             ]
         },
         "org.apache.httpcomponents:httpcore": {
-            "locked": "4.4.11",
+            "locked": "4.4.13",
             "transitive": [
                 "org.apache.httpcomponents:httpclient",
                 "org.elasticsearch.client:elasticsearch-rest-client"
@@ -11186,36 +11066,6 @@
             "locked": "2.2.0",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.9.1",
-            "transitive": [
-                "com.netflix.conductor:conductor-es5-persistence",
-                "com.netflix.conductor:conductor-es6-persistence",
-                "org.apache.logging.log4j:log4j-core",
-                "org.elasticsearch.plugin:aggs-matrix-stats-client",
-                "org.elasticsearch.plugin:lang-mustache-client",
-                "org.elasticsearch.plugin:parent-join-client",
-                "org.elasticsearch.plugin:percolator-client",
-                "org.elasticsearch.plugin:reindex-client",
-                "org.elasticsearch.plugin:transport-netty3-client",
-                "org.elasticsearch.plugin:transport-netty4-client",
-                "org.elasticsearch:elasticsearch"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-core": {
-            "locked": "2.9.1",
-            "transitive": [
-                "com.netflix.conductor:conductor-es5-persistence",
-                "com.netflix.conductor:conductor-es6-persistence",
-                "org.elasticsearch.plugin:aggs-matrix-stats-client",
-                "org.elasticsearch.plugin:lang-mustache-client",
-                "org.elasticsearch.plugin:parent-join-client",
-                "org.elasticsearch.plugin:percolator-client",
-                "org.elasticsearch.plugin:reindex-client",
-                "org.elasticsearch.plugin:transport-netty3-client",
-                "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "org.apache.lucene:lucene-analyzers-common": {
@@ -11468,7 +11318,7 @@
             ]
         },
         "org.flywaydb:flyway-core": {
-            "locked": "4.0.3",
+            "locked": "7.5.2",
             "transitive": [
                 "com.netflix.conductor:conductor-mysql-persistence",
                 "com.netflix.conductor:conductor-postgres-persistence"
@@ -11738,7 +11588,7 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-core": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -11758,13 +11608,13 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-sqs": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
         },
         "com.amazonaws:jmespath-java": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -12854,7 +12704,7 @@
             ]
         },
         "net.thisptr:jackson-jq": {
-            "locked": "0.0.11",
+            "locked": "0.0.12",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
@@ -12928,7 +12778,7 @@
             ]
         },
         "org.apache.httpcomponents:httpclient": {
-            "locked": "4.5.9",
+            "locked": "4.5.13",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-core",
                 "com.netflix.dyno:dyno-contrib",
@@ -12943,7 +12793,7 @@
             ]
         },
         "org.apache.httpcomponents:httpcore": {
-            "locked": "4.4.11",
+            "locked": "4.4.13",
             "transitive": [
                 "org.apache.httpcomponents:httpclient",
                 "org.elasticsearch.client:elasticsearch-rest-client"
@@ -12959,36 +12809,6 @@
             "locked": "2.2.0",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.9.1",
-            "transitive": [
-                "com.netflix.conductor:conductor-es5-persistence",
-                "com.netflix.conductor:conductor-es6-persistence",
-                "org.apache.logging.log4j:log4j-core",
-                "org.elasticsearch.plugin:aggs-matrix-stats-client",
-                "org.elasticsearch.plugin:lang-mustache-client",
-                "org.elasticsearch.plugin:parent-join-client",
-                "org.elasticsearch.plugin:percolator-client",
-                "org.elasticsearch.plugin:reindex-client",
-                "org.elasticsearch.plugin:transport-netty3-client",
-                "org.elasticsearch.plugin:transport-netty4-client",
-                "org.elasticsearch:elasticsearch"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-core": {
-            "locked": "2.9.1",
-            "transitive": [
-                "com.netflix.conductor:conductor-es5-persistence",
-                "com.netflix.conductor:conductor-es6-persistence",
-                "org.elasticsearch.plugin:aggs-matrix-stats-client",
-                "org.elasticsearch.plugin:lang-mustache-client",
-                "org.elasticsearch.plugin:parent-join-client",
-                "org.elasticsearch.plugin:percolator-client",
-                "org.elasticsearch.plugin:reindex-client",
-                "org.elasticsearch.plugin:transport-netty3-client",
-                "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "org.apache.lucene:lucene-analyzers-common": {
@@ -13211,7 +13031,7 @@
             ]
         },
         "org.flywaydb:flyway-core": {
-            "locked": "4.0.3",
+            "locked": "7.5.2",
             "transitive": [
                 "com.netflix.conductor:conductor-mysql-persistence",
                 "com.netflix.conductor:conductor-postgres-persistence"
@@ -13481,7 +13301,7 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-core": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -13501,13 +13321,13 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-sqs": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
         },
         "com.amazonaws:jmespath-java": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -14611,7 +14431,7 @@
             ]
         },
         "net.thisptr:jackson-jq": {
-            "locked": "0.0.11",
+            "locked": "0.0.12",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
@@ -14685,7 +14505,7 @@
             ]
         },
         "org.apache.httpcomponents:httpclient": {
-            "locked": "4.5.9",
+            "locked": "4.5.13",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-core",
                 "com.netflix.dyno:dyno-contrib",
@@ -14700,7 +14520,7 @@
             ]
         },
         "org.apache.httpcomponents:httpcore": {
-            "locked": "4.4.11",
+            "locked": "4.4.13",
             "transitive": [
                 "org.apache.httpcomponents:httpclient",
                 "org.elasticsearch.client:elasticsearch-rest-client"
@@ -14716,36 +14536,6 @@
             "locked": "2.2.0",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.9.1",
-            "transitive": [
-                "com.netflix.conductor:conductor-es5-persistence",
-                "com.netflix.conductor:conductor-es6-persistence",
-                "org.apache.logging.log4j:log4j-core",
-                "org.elasticsearch.plugin:aggs-matrix-stats-client",
-                "org.elasticsearch.plugin:lang-mustache-client",
-                "org.elasticsearch.plugin:parent-join-client",
-                "org.elasticsearch.plugin:percolator-client",
-                "org.elasticsearch.plugin:reindex-client",
-                "org.elasticsearch.plugin:transport-netty3-client",
-                "org.elasticsearch.plugin:transport-netty4-client",
-                "org.elasticsearch:elasticsearch"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-core": {
-            "locked": "2.9.1",
-            "transitive": [
-                "com.netflix.conductor:conductor-es5-persistence",
-                "com.netflix.conductor:conductor-es6-persistence",
-                "org.elasticsearch.plugin:aggs-matrix-stats-client",
-                "org.elasticsearch.plugin:lang-mustache-client",
-                "org.elasticsearch.plugin:parent-join-client",
-                "org.elasticsearch.plugin:percolator-client",
-                "org.elasticsearch.plugin:reindex-client",
-                "org.elasticsearch.plugin:transport-netty3-client",
-                "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "org.apache.lucene:lucene-analyzers-common": {
@@ -14998,7 +14788,7 @@
             ]
         },
         "org.flywaydb:flyway-core": {
-            "locked": "4.0.3",
+            "locked": "7.5.2",
             "transitive": [
                 "com.netflix.conductor:conductor-mysql-persistence",
                 "com.netflix.conductor:conductor-postgres-persistence"
@@ -15279,7 +15069,7 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-core": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -15299,13 +15089,13 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-sqs": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
         },
         "com.amazonaws:jmespath-java": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -16409,7 +16199,7 @@
             ]
         },
         "net.thisptr:jackson-jq": {
-            "locked": "0.0.11",
+            "locked": "0.0.12",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
@@ -16483,7 +16273,7 @@
             ]
         },
         "org.apache.httpcomponents:httpclient": {
-            "locked": "4.5.9",
+            "locked": "4.5.13",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-core",
                 "com.netflix.dyno:dyno-contrib",
@@ -16498,7 +16288,7 @@
             ]
         },
         "org.apache.httpcomponents:httpcore": {
-            "locked": "4.4.11",
+            "locked": "4.4.13",
             "transitive": [
                 "org.apache.httpcomponents:httpclient",
                 "org.elasticsearch.client:elasticsearch-rest-client"
@@ -16514,36 +16304,6 @@
             "locked": "2.2.0",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.9.1",
-            "transitive": [
-                "com.netflix.conductor:conductor-es5-persistence",
-                "com.netflix.conductor:conductor-es6-persistence",
-                "org.apache.logging.log4j:log4j-core",
-                "org.elasticsearch.plugin:aggs-matrix-stats-client",
-                "org.elasticsearch.plugin:lang-mustache-client",
-                "org.elasticsearch.plugin:parent-join-client",
-                "org.elasticsearch.plugin:percolator-client",
-                "org.elasticsearch.plugin:reindex-client",
-                "org.elasticsearch.plugin:transport-netty3-client",
-                "org.elasticsearch.plugin:transport-netty4-client",
-                "org.elasticsearch:elasticsearch"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-core": {
-            "locked": "2.9.1",
-            "transitive": [
-                "com.netflix.conductor:conductor-es5-persistence",
-                "com.netflix.conductor:conductor-es6-persistence",
-                "org.elasticsearch.plugin:aggs-matrix-stats-client",
-                "org.elasticsearch.plugin:lang-mustache-client",
-                "org.elasticsearch.plugin:parent-join-client",
-                "org.elasticsearch.plugin:percolator-client",
-                "org.elasticsearch.plugin:reindex-client",
-                "org.elasticsearch.plugin:transport-netty3-client",
-                "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "org.apache.lucene:lucene-analyzers-common": {
@@ -16796,7 +16556,7 @@
             ]
         },
         "org.flywaydb:flyway-core": {
-            "locked": "4.0.3",
+            "locked": "7.5.2",
             "transitive": [
                 "com.netflix.conductor:conductor-mysql-persistence",
                 "com.netflix.conductor:conductor-postgres-persistence"
@@ -17077,7 +16837,7 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-core": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -17097,13 +16857,13 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-sqs": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
         },
         "com.amazonaws:jmespath-java": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -18207,7 +17967,7 @@
             ]
         },
         "net.thisptr:jackson-jq": {
-            "locked": "0.0.11",
+            "locked": "0.0.12",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
@@ -18281,7 +18041,7 @@
             ]
         },
         "org.apache.httpcomponents:httpclient": {
-            "locked": "4.5.9",
+            "locked": "4.5.13",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-core",
                 "com.netflix.dyno:dyno-contrib",
@@ -18296,7 +18056,7 @@
             ]
         },
         "org.apache.httpcomponents:httpcore": {
-            "locked": "4.4.11",
+            "locked": "4.4.13",
             "transitive": [
                 "org.apache.httpcomponents:httpclient",
                 "org.elasticsearch.client:elasticsearch-rest-client"
@@ -18312,36 +18072,6 @@
             "locked": "2.2.0",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.9.1",
-            "transitive": [
-                "com.netflix.conductor:conductor-es5-persistence",
-                "com.netflix.conductor:conductor-es6-persistence",
-                "org.apache.logging.log4j:log4j-core",
-                "org.elasticsearch.plugin:aggs-matrix-stats-client",
-                "org.elasticsearch.plugin:lang-mustache-client",
-                "org.elasticsearch.plugin:parent-join-client",
-                "org.elasticsearch.plugin:percolator-client",
-                "org.elasticsearch.plugin:reindex-client",
-                "org.elasticsearch.plugin:transport-netty3-client",
-                "org.elasticsearch.plugin:transport-netty4-client",
-                "org.elasticsearch:elasticsearch"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-core": {
-            "locked": "2.9.1",
-            "transitive": [
-                "com.netflix.conductor:conductor-es5-persistence",
-                "com.netflix.conductor:conductor-es6-persistence",
-                "org.elasticsearch.plugin:aggs-matrix-stats-client",
-                "org.elasticsearch.plugin:lang-mustache-client",
-                "org.elasticsearch.plugin:parent-join-client",
-                "org.elasticsearch.plugin:percolator-client",
-                "org.elasticsearch.plugin:reindex-client",
-                "org.elasticsearch.plugin:transport-netty3-client",
-                "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "org.apache.lucene:lucene-analyzers-common": {
@@ -18594,7 +18324,7 @@
             ]
         },
         "org.flywaydb:flyway-core": {
-            "locked": "4.0.3",
+            "locked": "7.5.2",
             "transitive": [
                 "com.netflix.conductor:conductor-mysql-persistence",
                 "com.netflix.conductor:conductor-postgres-persistence"
@@ -18875,7 +18605,7 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-core": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -18895,13 +18625,13 @@
             ]
         },
         "com.amazonaws:aws-java-sdk-sqs": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
         },
         "com.amazonaws:jmespath-java": {
-            "locked": "1.11.796",
+            "locked": "1.11.951",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-kms",
                 "com.amazonaws:aws-java-sdk-s3",
@@ -20005,7 +19735,7 @@
             ]
         },
         "net.thisptr:jackson-jq": {
-            "locked": "0.0.11",
+            "locked": "0.0.12",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
             ]
@@ -20079,7 +19809,7 @@
             ]
         },
         "org.apache.httpcomponents:httpclient": {
-            "locked": "4.5.9",
+            "locked": "4.5.13",
             "transitive": [
                 "com.amazonaws:aws-java-sdk-core",
                 "com.netflix.dyno:dyno-contrib",
@@ -20094,7 +19824,7 @@
             ]
         },
         "org.apache.httpcomponents:httpcore": {
-            "locked": "4.4.11",
+            "locked": "4.4.13",
             "transitive": [
                 "org.apache.httpcomponents:httpclient",
                 "org.elasticsearch.client:elasticsearch-rest-client"
@@ -20110,36 +19840,6 @@
             "locked": "2.2.0",
             "transitive": [
                 "com.netflix.conductor:conductor-contribs"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-api": {
-            "locked": "2.9.1",
-            "transitive": [
-                "com.netflix.conductor:conductor-es5-persistence",
-                "com.netflix.conductor:conductor-es6-persistence",
-                "org.apache.logging.log4j:log4j-core",
-                "org.elasticsearch.plugin:aggs-matrix-stats-client",
-                "org.elasticsearch.plugin:lang-mustache-client",
-                "org.elasticsearch.plugin:parent-join-client",
-                "org.elasticsearch.plugin:percolator-client",
-                "org.elasticsearch.plugin:reindex-client",
-                "org.elasticsearch.plugin:transport-netty3-client",
-                "org.elasticsearch.plugin:transport-netty4-client",
-                "org.elasticsearch:elasticsearch"
-            ]
-        },
-        "org.apache.logging.log4j:log4j-core": {
-            "locked": "2.9.1",
-            "transitive": [
-                "com.netflix.conductor:conductor-es5-persistence",
-                "com.netflix.conductor:conductor-es6-persistence",
-                "org.elasticsearch.plugin:aggs-matrix-stats-client",
-                "org.elasticsearch.plugin:lang-mustache-client",
-                "org.elasticsearch.plugin:parent-join-client",
-                "org.elasticsearch.plugin:percolator-client",
-                "org.elasticsearch.plugin:reindex-client",
-                "org.elasticsearch.plugin:transport-netty3-client",
-                "org.elasticsearch.plugin:transport-netty4-client"
             ]
         },
         "org.apache.lucene:lucene-analyzers-common": {
@@ -20392,7 +20092,7 @@
             ]
         },
         "org.flywaydb:flyway-core": {
-            "locked": "4.0.3",
+            "locked": "7.5.2",
             "transitive": [
                 "com.netflix.conductor:conductor-mysql-persistence",
                 "com.netflix.conductor:conductor-postgres-persistence"

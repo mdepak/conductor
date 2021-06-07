@@ -1,7 +1,10 @@
 buildscript {
 
     repositories {
-        jcenter()
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
 
     dependencies {
@@ -42,6 +45,7 @@ dependencies {
 
     testCompile "org.codehaus.groovy:groovy-all:${revGroovy}"
     testCompile "org.spockframework:spock-core:${revSpock}"
+    testCompile "org.spockframework:spock-guice:${revSpock}"
     testCompile 'com.netflix.governator:governator-test-spock:latest.release'
     testCompile "org.elasticsearch:elasticsearch:${revElasticSearch5}"
     testCompile "org.elasticsearch.client:transport:${revElasticSearch5}"

@@ -12,6 +12,7 @@
  */
 package com.netflix.conductor.core.config;
 
+import com.google.common.base.Strings;
 import com.google.inject.AbstractModule;
 import java.util.List;
 import java.util.Map;
@@ -119,6 +120,9 @@ public interface Configuration {
     String WORKFLOW_ARCHIVAL_DELAY_QUEUE_WORKER_THREAD_COUNT_PROPERTY_NAME = "workflow.archival.delay.queue.worker.thread.count";
     int WORKFLOW_ARCHIVAL_DELAY_QUEUE_WORKER_THREAD_COUNT_DEFAULT_VALUE = 5;
 
+    String SUMMARY_INPUT_OUTPUT_JSON_SERIALIZATION_ENABLED_PROPERTY_NAME = "summary.input.output.json.serialization.enabled";
+    boolean SUMMARY_INPUT_OUTPUT_JSON_SERIALIZATION_ENABLED_DEFAULT_VALUE = false;
+
     String OWNER_EMAIL_MANDATORY_NAME = "workflow.owner.email.mandatory";
     boolean OWNER_EMAIL_MANDATORY_DEFAULT_VALUE = true;
 
@@ -129,6 +133,9 @@ public interface Configuration {
     String ELASTIC_SEARCH_DOCUMENT_TYPE_OVERRIDE_DEFAULT_VALUE = "";
 
     String EVENT_QUEUE_POLL_SCHEDULER_THREAD_COUNT_PROPERTY_NAME = "workflow.event.queue.scheduler.poll.thread.count";
+
+    String WORKFLOW_REPAIR_SERVICE_ENABLED = "workflow.repairservice.enabled";
+    boolean WORKFLOW_REPAIR_SERVICE_ENABLED_DEFAULT_VALUE = false;
 
     //TODO add constants for input/output external payload related properties.
 
@@ -366,14 +373,34 @@ public interface Configuration {
         return getIntProperty(WORKFLOW_ARCHIVAL_DELAY_QUEUE_WORKER_THREAD_COUNT_PROPERTY_NAME, WORKFLOW_ARCHIVAL_DELAY_QUEUE_WORKER_THREAD_COUNT_DEFAULT_VALUE);
     }
 
+    /**
+     * By default, this value is false, meaning that Java's default toString() method is used.
+     * @return if true, Workflow/Task Summary Input and Output are serialized as Json strings.
+     */
+    default boolean isSummaryInputOutputJsonSerializationEnabled()
+    {
+        return getBooleanProperty(SUMMARY_INPUT_OUTPUT_JSON_SERIALIZATION_ENABLED_PROPERTY_NAME, SUMMARY_INPUT_OUTPUT_JSON_SERIALIZATION_ENABLED_DEFAULT_VALUE);
+    }
 
     /**
-     * @return the number of threads to be use in Scheduler used for polling events from multiple event queues.
-     * By default, a thread count equal to the number of CPU cores is chosen.
+     * @return the number of threads to be use in Execution Scheduler used for polling events from multiple event queues.
+     *
+     * By default when not configured, null will be returned and the default computation scheduler(with threads equal to the number CPU cores) will be used.
      */
-    default int getEventSchedulerPollThreadCount()
-    {
-        return getIntProperty(EVENT_QUEUE_POLL_SCHEDULER_THREAD_COUNT_PROPERTY_NAME, Runtime.getRuntime().availableProcessors());
+    default Integer getEventSchedulerPollThreadCount() {
+        String threadCount = getProperty(EVENT_QUEUE_POLL_SCHEDULER_THREAD_COUNT_PROPERTY_NAME, null);
+        return Strings.isNullOrEmpty(threadCount) ? null : Integer.parseInt(threadCount);
+    }
+
+    /**
+     * Configuration to enable {@link com.netflix.conductor.core.execution.WorkflowRepairService}, that tries to keep
+     * ExecutionDAO and QueueDAO in sync, based on the task or workflow state.
+     *
+     * This is disabled by default; To enable, the Queueing layer must implement QueueDAO.containsMessage method.
+     * @return
+     */
+    default boolean isWorkflowRepairServiceEnabled() {
+        return getBooleanProperty(WORKFLOW_REPAIR_SERVICE_ENABLED, WORKFLOW_REPAIR_SERVICE_ENABLED_DEFAULT_VALUE);
     }
 
     /**
@@ -447,7 +474,13 @@ public interface Configuration {
 	 */
 	Long getMaxWorkflowOutputPayloadSizeThresholdKB();
 
-	/**
+    /**
+     *
+     * @return The maximum threshold of the workflow variables payload size in KB beyond which the task changes will be rejected and the task will be marked as FAILED_WITH_TERMINAL_ERROR
+     */
+    Long getMaxWorkflowVariablesPayloadSizeThresholdKB();
+
+    /**
 	 *
 	 * @return The threshold of the task input payload size in KB beyond which the payload will be stored in {@link com.netflix.conductor.common.utils.ExternalPayloadStorage}
 	 */
@@ -470,7 +503,6 @@ public interface Configuration {
 	 * @return The maximum threshold of the task output payload size in KB beyond which the task input will be rejected and the task will be marked as FAILED_WITH_TERMINAL_ERROR
 	 */
 	Long getMaxTaskOutputPayloadSizeThresholdKB();
-
 
     enum DB {
         REDIS, DYNOMITE, MEMORY, REDIS_CLUSTER, MYSQL, POSTGRES, CASSANDRA, REDIS_SENTINEL

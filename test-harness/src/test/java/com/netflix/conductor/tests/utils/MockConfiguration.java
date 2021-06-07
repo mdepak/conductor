@@ -62,6 +62,11 @@ public class MockConfiguration implements Configuration {
     }
 
     @Override
+    public Integer getEventSchedulerPollThreadCount() {
+        return null;
+    }
+
+    @Override
     public String getEnvironment() {
         return "test";
     }
@@ -114,6 +119,11 @@ public class MockConfiguration implements Configuration {
     @Override
     public Long getMaxWorkflowOutputPayloadSizeThresholdKB() {
         return 10240L;
+    }
+
+    @Override
+    public Long getMaxWorkflowVariablesPayloadSizeThresholdKB() {
+        return 2L;
     }
 
     @Override
